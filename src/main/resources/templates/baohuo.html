@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<style>
+    	input{
+    		width:7em;
+    		text-align:center;
+    	}
+    </style>
+<head>
+<link th:href="@{/css/countDown.css}" rel="stylesheet">
+<script th:src="@{/js/countDown.js}"></script>
+<div th:include="header::headLink"></div>
+<title>蓝海酒店集团报货系统</title>
+</head>
+<body style="background-color:#eee">
+	<div class="row wrapper border-bottom white-bg page-heading"
+		style="padding-top: 15px;">
+		<div class="col-lg-12" style="height:4em">
+			<span style="font-size: 22px; margin-top: 10px; margin-left: 10px"><strong>蓝海酒店集团报货系统</strong></span>
+			<span th:if="user.companyName!=null" style="position: absolute; right: 570px; top: 20px; font-size: 16px"th:text="'组织：'+${user.companyName}"></span>
+			<span style="position: absolute; right: 260px; top: 20px; font-size: 16px"th:text="'部门：'+${user.costCenterName}"></span>
+			<span style="position: absolute; right: 100px; top: 20px; font-size: 16px" th:text="'用户：'+${user.name}"></span> 
+			<!-- <a style="position: absolute; right: 70px; top: 20px; font-size: 16px" th:text="消息"></a> -->
+
+			<ol class="breadcrumb" style="padding-left: 15px; font-size: 16px">
+				<li class="breadcrumb-item"><a href="javascript:myHome()">欢迎进入！</a>
+				</li>
+			</ol>
+			
+			<div class="tooltip-demo" style="position:absolute;left:12em;top:28px;width:15em">
+									<p>
+    <input type="hidden" name="countDown" data-prefix="距离报货结束时间还剩：" value="2019/12/01 22:30:27"><span style="width:18em;height:2em;background-color:#fff;font-size:16px;color:#666"></span></p>
+								</div>
+			
+		</div>
+	</div>
+	<div class="animated" style="height: 100%;">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="ibox ">
+					<div class="ibox-content">
+						<div class="col-sm-12">
+							<div class="input-group">
+								
+								<div>
+									<span style="font-size: 16px" th:text="${'申请日期：'+day}" id="daySpan" th:today="${day}">申请日期：</span>
+									
+									<!-- <span
+										class="timeInput" size="16" type="text" 
+										style="width: 13em"></span> -->
+								</div>
+								<!-- <div class="float-left tooltip-demo col-sm-3" style="margin-left:10px">
+                        <span style="font-size:16px">单据编号：</span>
+                            <input class="djbhInput" type="text" value="" placeholder="请输入单据编号" style="border-color:#ddd">
+                           </div> -->
+								<div class="float-left col-sm-2">
+									<select data-placeholder="暂无模板" id="wlMbSelect"
+										 class="chosen-select mbSelect"
+										tabindex="2">
+										<option th:each="mbList : ${mbList}"th:if="${mbList.id==mbId}" selected th:value="${mbList.id}"th:text="${mbList.mbmc}"></option>
+										<option th:each="mbList : ${mbList}"th:if="${mbList.id!=mbId}" th:value="${mbList.id}"th:text="${mbList.mbmc}"></option>
+									</select>
+								</div>
+								<!-- 搜索框 -->
+								<div class="float-left tooltip-demo col-sm-2" >
+                            		<input type="text" class="form-control form-control-sm m-b-xs" style="border-radius:4px" id="filter" placeholder="可通过物料编码或名称搜索">     
+                                 </div>
+								
+								<div class="tooltip-demo" style="position:absolute;right:3em;">
+									<button type="button" class="btn btn-w-m btn-info"
+										id="seeHistoryOrder" onclick="toSeeHistoryOfSave()">我的报货</button>
+								</div>
+								<div class="tooltip-demo" style="position:absolute;right:14em;">
+									<button type="button" class="btn btn-w-m btn-info"
+										id="trialButton" onclick="toSaveBo()">保存</button>
+								</div>
+								<!-- <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="trialButton" onclick="toSubBo()">提交</button></div>
+                                      <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="seeHistoryOrder" onclick="toSeeHistoryOfSub()">查看提交</button></div>  -->
+							</div>
+						</div>
+						<table class="footable table table-stripped " data-page-size="15" data-limit-navigation="5"
+							style="margin-top:2em"  data-filter=#filter>
+							<thead>
+								<th width="10%" data-search="false" style="text-align: center" id="wlbmHeadTh" th:key="${BHKEY}" th:inputKey="${inputKey}" th:allKey="${allInputKey}">物料编码</th>
+								<th width="10%" data-search="true" style="text-align: center">物料名称</th>
+								<th width="10%" data-search="false" style="text-align: center">物料规格</th>
+								<th width="10%" data-search="false" style="text-align: center">计量单位</th>
+								<th width="10%" data-search="false" style="text-align: center">申请数量</th>
+								
+								
+								<th width="10%" data-search="false" style="text-align: center">上月平均<br>报货量
+								</th>
+								<th width="10%" data-search="false" style="text-align: center">去年当月<br>平均报货量
+								</th>
+								
+								<th width="10%" data-search="false" style="text-align: center">报货档口</th>
+								</tr>
+							</thead>
+							<tbody id="eatter">
+
+								<!-- <tr class="gradeX" th:if="${assessSituCount eq 0}">
+                                   <td colspan="12">暂无数据</td>
+                                </tr>  -->
+								<!--      <tr class="gradeX" th:each="plantypeList : ${plantypeList}"> -->
+								<tr class="gradeX tabletrVal" th:each="wlList: ${wlList}">
+									<td class="wlbmTd" th:text="${wlList.wlbm}" th:mbId="${wlList.mbId}" 
+										style="text-align: center"  >张三</td>
+									<td class="wlmcTd" th:text="${wlList.wlmc}"
+										style="text-align: center">张三</td>
+									<td th:text="${wlList.wlgg==null?'':wlList.wlgg}"
+										style="text-align: center"  >张三</td>
+									<td th:text="${wlList.wljl==null?'':wlList.wljl}"
+										style="text-align: center" >张三</td>
+										
+									<td style="text-align: center"  >
+										<input th:if="${inputKey=='0' || allInputKey == '0'}" disabled="disabled"  class="sqslInput" th:value="0" type="text" style="text-align: center">
+										<input th:if="${inputKey!='0' &amp;&amp; allInputKey != '0'}" class="sqslInput" th:value="0" type="number" min="0" style="text-align: center" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+									</td>
+										
+									<td
+										th:text="${wlList.lastMonthAvg==null?'暂无数据':wlList.lastMonthAvg}"
+										style="text-align: center">张三</td>
+									<td
+										th:text="${wlList.sameMonthOfLastYearAvg==null?'暂无数据':wlList.sameMonthOfLastYearAvg}"
+										style="text-align: center">张三</td>
+									
+									<td th:text="${user.costCenterName}"
+										style="text-align: center">张三</td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr>
+									<td colspan="14">
+										<ul class="pagination float-right"></ul>
+									</td>
+								</tr>
+
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--            <div id="eatter">
+           </div>  -->
+
+</body>
+<div th:include="footerLinkJs::footLink"></div>
+<script  th:inline="javascript">var timeKey1;var timeKey2;var AllinputTimeKey;
+            $(document).ready(function() {
+                $('.footable').footable();
+            	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true});
+          		  $("#wlMbSelect").change(function(){
+          			
+          			var mbId = $("#wlMbSelect").children('option:selected').val();
+          			mbId = encodeURI(mbId).replace(/\+/g,'%2B');
+          			window.location.href="/bh/showBh?mbId="+mbId;
+                    });
+          		var today = getBeforeDate(0);
+          		
+          		$('.timeInput').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			 startDay:today,
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		});
+          		
+          		$('.timeInput').val(today);
+          		
+          		
+          		var bhKey = $("#wlbmHeadTh").attr("key");
+          		var inputKey = $("#wlbmHeadTh").attr("inputKey");
+          		var allKey = $("#wlbmHeadTh").attr("allKey");
+          		if(bhKey == "0"){
+          			$("table input").attr("disabled","disabled");
+          		}else{
+          			if(inputKey == "1"){
+              			timeKey1 = window.setInterval("checkInputKey(0)",30000); 
+              		}else if(inputKey == "0"){
+              			timeKey2 = window.setInterval("checkInputKey(1)",30000); 
+              		}
+          		}
+          		
+          		if(allKey == "1"){
+          			if(bhKey == "1" && inputKey == "1"){
+          			//启动验证时间的定时器
+                  		AllinputTimeKey = window.setInterval("checkAllInputKey()",30000); 
+          			}
+          		}
+          		
+          		var data1 = [[${endTime}]];
+          		
+          		
+          		$("input[name='countDown']").each(function () {
+          	        var time_end=this.value;
+          	        var con=$(this).next("span");
+          	        var _=this.dataset;
+          	        countDown(con,{
+          	            title:_.title,//优先级最高,填充在prefix位置
+          	            prefix:_.prefix,//前缀部分
+          	            suffix:_.suffix,//后缀部分
+          	            time_end:data1//要到达的时间
+          	        })
+          	        //提供3个事件分别为:启动,重启,停止
+          	        .on("countDownStarted countDownRestarted  countDownEnded ",function (arguments) {
+          	            console.info(arguments);
+          	        });
+          	    });
+          		
+          		
+          		
+          		/* $("#filter").on("input",function(){
+          			//alert($(this).val().length);
+          			var leng = $(this).val().length;
+          			if(leng<2){
+          				alert(1);
+          				//$(this).val($(this).val()+" ");
+          			}
+          		})  */
+          		
+          		
+          		
+          		
+          		 $('#filter').bind('keypress', function (event) {
+          			if (event.keyCode == "13") {
+          				var oldValue = $(this).val();
+          			    var leng = oldValue.length;
+          				  
+	          			if(leng<2){
+	          				$(this).val(oldValue+" ");
+	          			}else{
+	          				oldValue = oldValue.replace(" ", "");
+	          				$(this).val(oldValue);
+	          			}
+	          		}
+	          	}); 
+	          		
+          		
+          		
+          		
+          		
+      		  }); 
+            
+
+            function checkInputKey(inputKey){
+            	
+            	var mbId = $("#wlMbSelect").val();
+            	$.ajax({
+                    type: 'post',
+                    url: "/bh/checkInputKey",
+                    data: { mbId:mbId},
+                    success: function (data) {
+                    	if(inputKey == "0"){
+                    		if(data == "0"){
+                    			toastr.error("该模板已不允许报货");
+                       		  $("table input").attr("disabled","disabled");
+                       		 window.clearTimeout(timeKey1);//去掉定时器 
+                       		timeKey2 = window.setInterval("checkInputKey(1)",10000); 
+                    		}
+                    	}else if(inputKey == "1"){
+                    		if(data == "1"){
+                    			$("table input").attr("disabled",false);
+                   			  toastr.success("该模板已恢复报货");
+                   			 window.clearTimeout(timeKey2);
+                   			timeKey1 = window.setInterval("checkInputKey(0)",10000); 
+                    		}
+                    	}
+                    	
+                    	
+                    	
+                    	
+                    	/* 
+                 	   if(data=="0"){
+                 		  toastr.error("该模板已不允许报货");
+                 		  $("table input").attr("disabled","disabled");
+                 		 window.clearTimeout(timeKey1);//去掉定时器 
+                 		
+             			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+             		   }else if(data=="1"){
+             			  $("table input").attr("disabled",false);
+             			  toastr.success("该模板已恢复报货");
+             			 window.clearTimeout(timeKey2);
+             			
+             		   } */
+                    }
+                });
+            }
+            
+            //时间段控制
+            function checkAllInputKey(){
+            	$.ajax({
+                    type: 'post',
+                    url: "/makeCheckDate/checkAllInputKey",
+                    data: {},
+                    success: function (data) {
+                 	   if(data=="0"){
+                 		  toastr.error("该时间已不允许报货");
+                 		 window.clearTimeout(AllinputTimeKey);//去掉定时器 
+                 		  window.location.reload();
+             			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+             		   }
+                    }
+                });
+            }
+            
+            
+            function getBeforeDate(n){//n为你要传入的参数，当前为0，前一天为-1，后一天为1
+                  var date = new Date() ;
+                  var year,month,day ;
+                  date.setDate(date.getDate()+n);
+                  year = date.getFullYear();
+                  month = date.getMonth()+1;
+                  day = date.getDate() ;
+                  s = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) ;
+                  return s ;
+                }
+            
+            //保存
+     function toSaveBo(){
+         var day = $('#daySpan').attr("today");
+         if(isEmpty(day)){
+        	 toastr.error("申请时间不能为空");
+        	 return;
+         }
+    	 /* var djbh = $(".djbhInput").get(0).value;
+    	 if(isEmpty(djbh)){
+    		 toastr.error("单据编号不能为空");
+    		 return;
+    	 } */
+    	 var trList = $(".tabletrVal");
+    	 if(0 == trList.length){
+     		toastr.error("没有数据需要保存");
+     		return;
+     	 }
+    	 var value="[";
+    	 for (var i=0;i<trList.length;i++) {
+    		 var wlbm = trList.eq(i).find(".wlbmTd").text();
+    		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+    		 var  mbId = trList.eq(i).find(".wlbmTd").attr("mbId");
+    		 if(sqsl == '0' || sqsl == ''){
+    			 continue;
+    		 }
+    	 if(i==0){
+			   value+="{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\",\"mbId\":\""+mbId+"\"}";
+		   }else{
+			   value+=",{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\",\"mbId\":\""+mbId+"\"}";
+		   }
+    	 }
+    	 value+="]";
+    	 //alert(value);
+    	 $.ajax({
+             type: 'post',
+             url: "/bh/toSaveBh",
+             data: { val:value,day:day},
+             success: function (data) {
+          	   if(data=="保存成功"){
+      			   toastr.success(data);
+      			 $("table input").val(0);
+      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      		   }else{
+      			   toastr.error(data);
+      		   }
+             }
+         });
+     }
+            
+            
+            
+            
+     
+     //提交（默认先保存在提交）
+     function toSubBo(){
+         var day = $('.timeInput').val();
+         if(isEmpty(day)){
+        	 toastr.error("申请时间不能为空");
+        	 return;
+         }
+    	 /* var djbh = $(".djbhInput").get(0).value;
+    	 if(isEmpty(djbh)){
+    		 toastr.error("单据编号不能为空");
+    		 return;
+    	 } */
+    	 var trList = $(".tabletrVal");
+    	 if(0 == trList.length){
+     		toastr.error("没有数据需要保存");
+     		return;
+     	 }
+    	 var value="[";
+    	 for (var i=0;i<trList.length;i++) {
+    		 var wlbm = trList.eq(i).find(".wlbmTd").text();
+    		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+    		 if(sqsl == '0'){
+    			 continue;
+    		 }
+    	 if(i==0){
+			   value+="{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }else{
+			   value+=",{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }
+    	 }
+    	 value+="]";
+    	 //保存
+    	 $.ajax({
+             type: 'post',
+             url: "/bh/toSaveBh",
+             data: { val:value,day:day,sub:1},
+             success: function (data) {
+          	   if(data=="保存并提交成功"){
+      			   toastr.success(data);
+      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      		   }else{
+      			   toastr.error(data);
+      		   }
+             }
+         });
+     }
+     function toSeeHistoryOfSave(){
+    	 window.location.href="/bh/toSeeHistoryOfSave";
+     }
+     function toSeeHistoryOfSub(){
+    	 window.location.href="/bh/toSeeHistoryOfSub";
+     }
+            
+   //判断是否为空
+     function isEmpty(obj){
+  	    if(typeof obj == "undefined" || obj == null || obj == ""){
+  	        return true;
+  	    }else{
+  	        return false;
+  	    }
+  	}
+   
+            </script>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<div th:include="header::headLink"></div>
+    <title>蓝海报货系统</title>
+<style type="text/css">
+	.form-signin{
+		max-width:330px;
+		padding:15px;
+		margin:0 auto;
+		margin-top:50px;
+		line-height:20em;
+	}
+	input{
+		margin-bottom:10px;
+		
+	}
+</style>
+</head>
+
+<body class="gray-bg">
+	<div class="container ">
+       <form class="form-signin" id="logForm">
+       		<h2 class="form-signin-heading">欢迎登陆</h2>
+       		<input type="text" class="form-control" placeholder="用户名" required autofocus name="userName">
+       		<input type="password" class="form-control" placeholder="密码" required name="password">
+       		
+       		<button class="btn btn-md btn-primary btn-block" type="submit" id="subButton">登陆</button>
+       </form>
+    </div>
+    <div th:include="footerLinkJs::footLink"></div>
+   <script>
+   $(document).ready(function() {
+	   document.onkeydown = function (event) {
+	        var e = event || window.event;
+	        if (e && e.keyCode == 13) { //回车键的键值为13
+	            $("#login").click(); //调用登录按钮的登录事件
+	        }
+	    }; 
+	   $("#subButton").click(function(){
+		   
+		   $.post("/log/toLogin",$("#logForm").serialize(),function(data,status){
+			  /*  if(data.info=="1"){
+				   if(data.error=="初始密码"){
+					   var params = new Array();
+					    params.push({ name: "userName", value: $("#name").val()});
+					    Post("/upPassword", params);
+				   }else if(data.error=="二次验证"){
+					   var params = new Array();
+				     params.push({name: "user",value:$("#form").serialize()});
+					    Post("/keylogin", params); 
+				   }else{
+				   window.location.replace("/index");}
+			   }else{
+				   var ms=$("#ms");
+				   ms.css({color:"#fc4343"});
+				   ms.html(data.error);
+			   } */
+		   });
+		 });
+   });
+   function Post(URL, PARAMTERS) {
+	    //创建form表单
+	    var temp_form = document.createElement("form");
+	    temp_form.action = URL;
+	    //如需打开新窗口，form的target属性要设置为'_blank'
+	    temp_form.target = "_self";
+	    temp_form.method = "post";
+	    temp_form.style.display = "none";
+	    //添加参数
+	    for (var item in PARAMTERS) {
+	        var opt = document.createElement("textarea");
+	        opt.name = PARAMTERS[item].name;
+	        opt.value = PARAMTERS[item].value;
+	        temp_form.appendChild(opt);
+	    }
+	    document.body.appendChild(temp_form);
+	    //提交数据
+	    temp_form.submit();
+	}
+   </script>
+</body>
+
+</html>

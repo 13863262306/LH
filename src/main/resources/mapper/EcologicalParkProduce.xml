@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="lanhai.dao.EcologicalParkProduceDao">
+	
+	<select id="selectMbs" resultType="lanhai.entity.Mblx">
+		select FID as id,FNUMBER as mbmc from CT_CUS_LHBHTEMPLATE
+	</select>
+	
+	<select id="selectWlByMbId" parameterType="map" resultType="lanhai.entity.WL_list">
+		select CCL.CFWLID as wlbm,
+				CCL.CFWLNAME as wlmc,
+				CCL.CFWLGUIGE as wlgg,
+				(SELECT fname_l2 from t_bd_measureunit where FID=CCL.CFWLUNITEID) as wljl
+		from CT_CUS_LHBHTEMPLATEENTRY CCL
+		<if test="mbId!=null">where FPARENTID=#{mbId}</if>
+		<!-- select * from  WL_LIST <if test="mbId!=null">where FID=#{mbId}</if> -->
+	</select>
+	
+	<insert id="saveEcoParkProduce" parameterType="map">
+		insert into  ECOLOGICAL_PARK_PRODUCE (ID,PARK_ID,WL_ID,YIELD,SUB_DAY,SUB_STATE) values(#{id},#{epId},#{wlbm},#{yield},#{day},'0')
+	</insert>
+	
+	
+	<select id="selectParkTbByDay" parameterType="map" resultType="lanhai.entity.Jdhz">
+		SELECT EPP.ID as djbh,
+				EPP.SUB_STATE as subState,
+				EPP.WL_ID as wlbm,
+				tbml.fname_l2 as wlmc,
+		   tbml.FModel as wlgg,
+           TBM.fname_l2 as jldw,
+				EPP.YIELD as sqsl,
+				EPP.SUB_DAY as sqrq
+		from ECOLOGICAL_PARK_PRODUCE  EPP 
+		left join T_BD_Material tbml on tbml.fnumber=epp.wl_id
+		 left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		
+		 where EPP.SUB_DAY=#{day} and EPP.PARK_ID=#{epId} order by EPP.SUB_DAY ,EPP.ID
+	</select>
+	
+	<select id="selectIfHaveByWlbmAndDay" parameterType="map" resultType="lanhai.entity.ProducePaper">
+		select PARK_ID as produceCompanyId,
+			WL_ID as wlbm,
+			YIELD,
+			SUB_DAY as bizDate,
+			id,
+			SUB_STATE as subState
+			from ECOLOGICAL_PARK_PRODUCE 
+		where wl_id=#{wlbm} and SUB_DAY=#{day} and SUB_STATE='0'
+	</select>
+	
+	
+	<update id="updateSbslByDjbh" parameterType="map" >
+		update ECOLOGICAL_PARK_PRODUCE set YIELD=#{sqsl} where ID=#{djbh}
+	</update>
+	<update id="updateSubState" parameterType="map">
+		update ECOLOGICAL_PARK_PRODUCE set SUB_STATE=#{state} where SUB_DAY=#{sqrq} and ID=#{djbh} and PARK_ID=#{epId}
+	</update>
+	
+	
+	<delete id="deleteTbByDjbh" parameterType="java.lang.String">
+		delete from ECOLOGICAL_PARK_PRODUCE where ID=#{djbh}
+	</delete>
+	
+	
+	
+	<insert id="saveToEas" parameterType="map">
+		insert into t_im_manufacturerecbill(
+						FID, 
+						FCREATORID, 
+						FCREATETIME, 
+						FCONTROLUNITID, 
+						FNUMBER, 
+						FBIZDATE, 
+						FAUDITORID, 
+						FBASESTATUS, 
+						FBIZTYPEID, 
+						FBILLTYPEID, 
+						FYEAR, 
+						FPERIOD, 
+						FSTORAGEORGUNITID, 
+						FTOTALQTY, 
+						FTOTALAMOUNT, 
+						FFIVOUCHERED, 
+						
+						
+						
+						
+						
+						FTOTALSTANDARDCOST, 
+						FTOTALACTUALCOST, 
+						FISREVERSED, 
+						FTRANSACTIONTYPEID, 
+						FISINITBILL, 
+						FMODIFIERID, 
+						FMODIFICATIONTIME, 
+						FCOSTCENTERORGUNITID, 
+						FISBACKFLUSHSUCCEED, 
+						FMONTH, 
+						FDAY, 
+						FPROCESSORGUNITID)
+ 		values 
+			(newbosid('FA1292B4'), 
+			#{pmId},
+			SYSTIMESTAMP,
+			'yDAAAAAADK/M567U',
+			#{number}, 
+			SYSTIMESTAMP,
+			#{userPmId}
+			1, 
+			'Nz878AEgEADgAABFwKg/GiQHQ1w=',
+			'50957179-0105-1000-e000-0167c0a812fd463ED552', 
+			#{year},
+			3, 
+			#{kczzId},
+			#{totalCount},
+			#{totalPrice},
+			0, 
+			
+			
+			
+			
+			
+			0, 
+			0, 
+			222, 
+			0, 
+			N'DawAAAAPoCqwCNyn', 
+			0, 
+			'0s0ubeYzQfeR/t1w08p+nxO33n8=', 
+			{ts'2014-03-07 15:20:28'}, 
+			N'yDAAAAA+mG3M567U', 
+			5, 
+			201403, 
+			20140307, 
+			N'yDAAAAAADK/M567U');
+	</insert>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

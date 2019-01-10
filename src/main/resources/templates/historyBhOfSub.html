@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<div th:include="header::headLink"></div>
+    	<title>报货记录</title>
+	</head>
+<body style="background-color:#eee">
+            <div class="row wrapper border-bottom white-bg page-heading" style="padding-top: 15px">
+                <div class="col-lg-12">
+                    <span style="font-size: 22px; margin-top: 10px; margin-left: 10px"><strong th:text="${day+'  '+'报货记录'}">报货系统</strong></span>
+					<span th:if="user.companyName!=null" style="position: absolute; right: 570px; top: 20px; font-size: 16px"th:text="'组织：'+${user.companyName}"></span>
+			<span style="position: absolute; right: 260px; top: 20px; font-size: 16px"th:text="'部门：'+${user.costCenterName}"></span>
+			<span style="position: absolute; right: 100px; top: 20px; font-size: 16px" th:text="'用户：'+${user.name}"></span> 
+					<!-- <a style="position: absolute; right: 70px; top: 20px; font-size: 16px" th:text="消息"></a> -->
+                </div>  </div>
+              <div class="animated" style="height:100%;background-color:#eee">
+            <div class="row">
+                <div class="col-lg-12">                   
+                    <div class="ibox ">                             
+                        <div class="ibox-content">
+                               <div class="col-sm-12"> 
+                        <div class="input-group">
+                        <div><span style="font-size:16px">申请日期：</span><input class="timeInput" size="16" type="text" th:value="${day}"  style="width:8em;text-align:center"></div>
+                        <!-- <div class="float-left tooltip-demo col-sm-3" style="margin-left:10px">
+                        <span style="font-size:16px">单据编号：</span>
+                            <input class="djbhInput" type="text" value="" placeholder="请输入单据编号" style="border-color:#ddd">
+                           </div> -->
+                        <!-- <div class="float-left col-sm-3">
+                            <select  data-placeholder="请选择物料模板" id="wlMbSelect" style="width:350px;" class="chosen-select mbSelect"  tabindex="2">
+                                <option th:each="mbList : ${mbList}" th:if="${mbList.id==mbId}" selected th:value="${mbList.id}" th:text="${mbList.mbmc}">部门奖金包上传</option>
+                                <option th:each="mbList : ${mbList}" th:if="${mbList.id!=mbId}" th:value="${mbList.id}" th:text="${mbList.mbmc}">部门奖金包上传</option>
+                            </select> 
+                           </div> --><!-- <div class="float-left tooltip-demo" style="position:absolute;right:25em"><button type="button" class="btn btn-w-m btn-info"  id="turnDay" onclick="toChangeDay()">查看</button></div> -->
+                                      <div class="float-left tooltip-demo" style="position:absolute;right:14em"><button type="button" class="btn btn-w-m btn-info"  id="toBackSub" onclick="toBackSub()">全部撤回</button></div>
+                                      <div class="float-left tooltip-demo" style="position:absolute;right:3em"><button type="button" class="btn btn-w-m btn-info"  id="toSeeSave" onclick="goToSeeSave()">返回我的报货</button></div>
+                                      <!-- <div class="float-left tooltip-demo" style="position:absolute;right:3em"><button type="button" class="btn btn-w-m btn-info"  id="toBh" onclick="goOnBh()">返回报货首页</button></div> -->
+                                      
+                                      <!-- <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="seeHistoryOrder" onclick="toSeeHistory()">查看历史订单</button></div> --> 
+                                   </div>
+                            </div>
+                            <table class="footable table table-stripped " data-limit-navigation="5" data-page-size="10" data-filter=#filter style="margin-top:1em">
+                                <thead>
+                                    <th  width="12%"  style="text-align:center">物料编码</th>
+                                    <th  width="12%"  style="text-align:center">物料名称</th>
+                                    <th  width="12%" style="text-align:center" >物料规格</th>
+                                    <th  width="12%" style="text-align:center" >计量单位</th>
+                                    <th  width="12%" style="text-align:center">申请数量</th>
+                                    <th  width="12%" style="text-align:center">审核数量</th>
+                                    <th  width="12%" style="text-align:center">提交状态</th>
+                                    <!-- <th width="12%" style="text-align:center">操作</th> -->
+                                </tr>
+                                </thead>
+                                <tbody id="eatter">
+                                 
+                                <tr class="gradeX" th:if="${listSize eq 0}">
+                                   <td colspan="12">暂无数据</td>
+                                </tr> 
+                           <!--      <tr class="gradeX" th:each="plantypeList : ${plantypeList}"> -->
+                                 <tr  class="gradeX tabletrVal" th:each="wlList: ${wlList}" >
+                                    <td class="wlbmTd" th:djbh="${wlList.djbh}" th:state="${wlList.subState}" th:text="${wlList.wlbm}" style="text-align:center" >张三</td>
+                                    <td class="wlmcTd" th:text="${wlList.wlmc}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.wlgg==null?'':wlList.wlgg}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.jldw==null?'':wlList.jldw}"style="text-align:center">张三</td>
+                                    <td style="text-align:center" th:text="${wlList.sqsl==null?'':wlList.sqsl}"></td>
+                                    <td th:text="${wlList.shsl==null?wlList.sqsl:wlList.shsl}" style="text-align:center">张三</td>
+                                    <td th:if="${wlList.subState eq '1'}" style="text-align:center"><button class="btn btn-success" th:state="${wlList.subState}">已提交</button></td>
+                                    <td th:if="${wlList.subState eq '3'}" style="text-align:center"><button class="btn btn-success" th:state="${wlList.subState}">已提交</button></td>
+                                    <td th:if="not ${wlList.subState eq '1' || wlList.subState eq '3' }" style="text-align:center"><button class="btn btn-error" th:state="${wlList.subState}">未提交</button></td>
+                                    <!-- <td style="text-align:center" th:if="${wlList.subState eq '3'}"><button type="button" disabled="false" th:attr="djbh=${wlList.djbh}" class="btn btn-w-m btn-danger delButton" onclick="toDelBo(this)">删除</button></td> -->
+                                    <!-- <td style="text-align:center" th:if="not ${wlList.subState eq '3'}"><button type="button" th:attr="djbh=${wlList.djbh}" class="btn btn-w-m btn-danger delButton" onclick="toDelBo(this)">删除</button></td> -->
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td  colspan="14">
+                                        <ul class="pagination float-right"></ul>
+                                    </td>
+                                </tr>
+                                
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>              
+<!--            <div id="eatter">
+           </div>  -->
+            
+        </body>
+    <div th:include="footerLinkJs::footLink"></div>
+    <script>
+            $(document).ready(function() {
+                $('.footable').footable();
+            	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true});
+          		  /* $("#wlMbSelect").change(function(){
+          			window.location.href="/bh/showBh?mbId="+$("#wlMbSelect").children('option:selected').val();
+                    }); */
+          		var today = getBeforeDate(0);
+          		console.log(today);
+          		$('.timeInput').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			startDay:today,
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		}).on('changeDate',function(ev){
+          			toChangeDay();
+          			return;
+          		});
+          		
+          		/* $('.timeInput').val(today); */
+            })	
+            function getBeforeDate(n){//n为你要传入的参数，当前为0，前一天为-1，后一天为1
+                  var date = new Date() ;
+                  var year,month,day ;
+                  date.setDate(date.getDate()+n);
+                  year = date.getFullYear();
+                  month = date.getMonth()+1;
+                  day = date.getDate() ;
+                  s = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) ;
+                  return s ;
+                }
+          function goOnBh(){
+        	  window.location.href="/bh/showBh";
+          }
+            
+          function toChangeDay(){
+        	  var day = $('.timeInput').val();
+        	  if(isEmpty(day)){
+             	 toastr.error("申请时间不能为空");
+             	 return;
+              }
+        	  window.location.href="/bh/toSeeHistoryOfSub?day="+day;
+          }
+          
+          //删除：
+          function toDelBo(ele){
+        	  //var djbh = e.parent().parent();
+        	  var thisButton = $(ele);
+        	  var djbh = thisButton.attr("djbh");
+        	  
+        	  $.ajax({
+                  type: 'post',
+                  url: "/jdhz/delOneRow",
+                  data: {djbh:djbh},
+                  success: function (data) {
+               	   if(data=="删除成功"){
+               		   
+           			   toastr.success(data);
+           			   thisButton.parent().parent().remove();
+           		   }else{
+           			   toastr.error(data);
+           		   }
+                  }
+              });
+          }
+          
+          
+          
+          function goToSeeSave(){
+        	  window.location.href="/bh/toSeeHistoryOfSave";
+          }
+          
+          
+          //撤回提交
+          function toBackSub(){
+        	  /* var trList = $(".tabletrVal");
+         	 if(0 == trList.length){
+          		toastr.error("没有数据需要撤回");
+          		return;
+          	 } */
+         	 /* for(var j=0;j<trList.length;j++){
+         		 var subState = trList.eq(j).find(".wlbmTd").attr("state");
+         		 if(subState != "1"){
+         			toastr.error("数据已被处理，无法撤回！");
+         			return;
+         		 }
+         	 } */
+         	 /* var value="[";
+         	 for (var i=0;i<trList.length;i++) {
+         		 var djbh = trList.eq(i).find(".wlbmTd").attr("djbh");
+         	 if(i==0){
+     			   value+="{\"djbh\":\""+djbh+"\"}";
+     		   }else{
+     			   value+=",{\"djbh\":\""+djbh+"\"}";
+     		   }
+         	 }
+         	 value+="]"; */
+         	 $.ajax({
+                  type: 'post',
+                  url: "/bh/toBackBh",
+                  data: {},
+                  success: function (data) {
+               	   if(data=="撤回成功"){
+           			   toastr.success(data);
+           			  window.location.reload();
+           			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+           		   }else{
+           			   toastr.error(data);
+           		   }
+                  }
+              });
+          }
+          
+      function goOnSub(){
+    	  var day = $('.timeInput').val();
+    	  var trList = $(".tabletrVal");
+    	  if(0 == trList.length){
+       		toastr.error("没有数据需要提交");
+       		return;
+       	 }
+    	 
+    	  var value="[";
+     	 for (var i=0;i<trList.length;i++) {
+     		 var djbh = trList.eq(i).find(".delButton").attr("djbh");
+     		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+     	 if(i==0){
+ 			   value+="{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+ 		   }else{
+ 			   value+=",{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+ 		   }
+     	 }
+     	 value+="]";
+    	  
+    	  
+     	//提交
+    	 $.ajax({
+             type: 'post',
+             url: "/bh/toSubmitBh",
+             data: { val:value},
+             success: function (data) {
+          	   if(data=="已提交"){
+      			   toastr.success(data);
+      			 window.location.href="/bh/toSeeHistoryOfSub?day="+day;
+      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      		   }else{
+      			   toastr.error(data);
+      		   }
+             }
+         });
+    	  
+      }
+            //保存
+      function toSaveBo(){
+    	 var trList = $(".tabletrVal");
+    	 if(0 == trList.length){
+     		toastr.error("没有数据需要保存");
+     		return;
+     	 }
+    	 var value="[";
+    	 for (var i=0;i<trList.length;i++) {
+    		 var djbh = trList.eq(i).find(".delButton").attr("djbh");
+    		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+    	 if(i==0){
+			   value+="{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }else{
+			   value+=",{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }
+    	 }
+    	 value+="]";
+    	 //保存
+    	 $.ajax({
+             type: 'post',
+             url: "/bh/toSaveBhOfHistory",
+             data: { val:value},
+             success: function (data) {
+          	   if(data=="修改成功"){
+      			   toastr.success(data);
+      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      		   }else{
+      			   toastr.error(data);
+      		   }
+             }
+         });
+     } 
+            
+            
+   //判断是否为空
+     function isEmpty(obj){
+  	    if(typeof obj == "undefined" || obj == null || obj == ""){
+  	        return true;
+  	    }else{
+  	        return false;
+  	    }
+  	}
+   
+            </script>
+</html>

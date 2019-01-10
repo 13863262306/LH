@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<style>
+    	input{
+    		width:7em;
+    		text-align:center;
+    	}
+    </style>
+<head>
+<div th:include="header::headLink"></div>
+<title>报货时间控制</title>
+</head>
+<body style="background-color:#eee">
+	<div class="row wrapper border-bottom white-bg page-heading"
+		style="padding-top: 15px;">
+		<div class="col-lg-12">
+			<span style="font-size: 22px; margin-top: 10px; margin-left: 10px"><strong>报货系统时间控制</strong></span>
+			<!-- <a style="position: absolute; right: 70px; top: 20px; font-size: 16px" th:text="消息"></a> -->
+
+			<ol class="breadcrumb" style="padding-left: 15px; font-size: 16px">
+				<li class="breadcrumb-item"><a href="javascript:myHome()"></a>
+				</li>
+			</ol>
+		</div>
+	</div>
+	<div class="animated" style="height: 100%; ">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="ibox ">
+					<div class="ibox-content">
+						<div class="col-sm-10">
+								<div style="margin:20px auto">
+									<span style="font-size: 16px;">档口报货时间设置：</span><br><br>
+									<span style="font-size: 16px">开始时间：</span>
+									
+									<input class="timeInput" size="16" type="text"  id="dkBeginTimeInput" style="width:13em" th:value="${dkStartTime}">
+									
+									<br>
+									
+									<span style="font-size: 16px">结束时间：</span>
+									<input  class="timeInput" size="16" type="text" id="dkEndTimeInput"  style="width:13em;margin:15px auto" th:value="${dkEndTime}">
+									<br>
+									<div class="float-left tooltip-demo" style="margin-left: 2%">
+									<button type="button" class="btn btn-w-m btn-info"
+										id="trialButton" onclick="toSetBhTime(1)">设置</button>
+								</div>
+								</div>
+								<br>
+								<div style="margin-top:20px">
+									<span style="font-size: 16px">组织生成报货单时间设置：</span><br><br>
+									<span style="font-size: 16px">开始时间：</span>
+									
+									<input class="timeInput" size="16" type="text"  id="jdBeginTimeInput" style="width:13em" th:value="${jdStartTime}">
+									
+									<br>
+									
+									<span style="font-size: 16px">结束时间：</span>
+									<input  class="timeInput" size="16" type="text" id="jdEndTimeInput"  style="width:13em;margin:15px auto" th:value="${jdEndTime}">
+									<br>
+									<div class="float-left tooltip-demo" style="margin-left: 2%">
+									<button type="button" class="btn btn-w-m btn-info"
+										id="trialButton" onclick="toSetBhTime(2)">设置</button>
+								</div>
+								</div>
+								<!-- <div class="float-left tooltip-demo col-sm-3" style="margin-left:10px">
+                        <span style="font-size:16px">单据编号：</span>
+                            <input class="djbhInput" type="text" value="" placeholder="请输入单据编号" style="border-color:#ddd">
+                           </div> -->
+								<!-- <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="trialButton" onclick="toSubBo()">提交</button></div>
+                                      <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="seeHistoryOrder" onclick="toSeeHistoryOfSub()">查看提交</button></div>  -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--            <div id="eatter">
+           </div>  -->
+
+</body>
+<div th:include="footerLinkJs::footLink"></div>
+<script>
+            $(document).ready(function() {
+                $('.footable').footable();
+            	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true});
+          		
+          		$('.timeInput').datetimepicker({
+          			 autoclose: true,
+          			  //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 startView:1,
+          			 format: "hh-ii",
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		});
+          		
+          		
+          		
+      		  }); 
+            
+            
+            
+            //时间段设置
+            function toSetBhTime(ele){
+            	
+            	if("1"==ele){
+            		//设置档口
+            		var dkStartTime = $("#dkBeginTimeInput").val();
+                	var dkEndTime = $("#dkEndTimeInput").val();
+                	$.ajax({
+                        type: 'post',
+                        url: "/makeCheckDate/setBhTime",
+                        data: {startTime:dkStartTime,endTime:dkEndTime,orgType:"1"},
+                        success: function (data) {
+                     	   if(data=="设置成功"){
+                 			   toastr.success(data);
+                 			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+                 		   }else{
+                 			   toastr.error(data);
+                 		   }
+                        }
+                    });
+            	}else if("2" == ele){
+            		//设置酒店
+            		var jdStartTime = $("#jdBeginTimeInput").val();
+                	var jdEndTime = $("#jdEndTimeInput").val();
+                	$.ajax({
+                        type: 'post',
+                        url: "/makeCheckDate/setBhTime",
+                        data: {startTime:jdStartTime,endTime:jdEndTime,orgType:"2"},
+                        success: function (data) {
+                     	   if(data=="设置成功"){
+                 			   toastr.success(data);
+                 			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+                 		   }else{
+                 			   toastr.error(data);
+                 		   }
+                        }
+                    });
+            	}
+            	
+            }
+            
+            
+            //时间段控制
+            function checkAllInputKey(){
+            	$.ajax({
+                    type: 'post',
+                    url: "/makeCheckDate/checkAllInputKey",
+                    data: {},
+                    success: function (data) {
+                 	   if(data=="0"){
+             			   toastr.success(data);
+             			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+             		   }else{
+             			   toastr.error(data);
+             		   }
+                    }
+                });
+            }
+   
+            </script>
+</html>

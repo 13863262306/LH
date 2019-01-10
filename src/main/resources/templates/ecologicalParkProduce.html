@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<div th:include="header::headLink"></div>
+    <title>生态园生产量填报</title>
+	</head>
+<body style="background-color:#eee">
+            <div class="row wrapper border-bottom white-bg page-heading" style="padding-top: 15px">
+                <div class="col-lg-12">
+                    <span style="font-size: 22px; margin-top: 10px; margin-left: 10px"><strong>生态园生产量填报</strong></span>
+					<span style="position: absolute; right: 280px; top: 20px; font-size: 16px"th:text="${'组织：'+user.companyName}"></span> 
+					<span style="position: absolute; right: 150px; top: 20px; font-size: 16px" th:text="${'用户：'+user.name}"></span> 
+					<!-- <a style="position: absolute; right: 70px; top: 20px; font-size: 16px" th:text="消息"></a> -->
+                    <ol class="breadcrumb" style="margin-left:10px">
+                        <li class="breadcrumb-item">
+                            <a href="javascript:;">欢迎使用！</a>
+                        </li>
+                    </ol>
+                </div>  </div>
+              <div class="animated" style="height:100%;background-color:#eee">
+            <div class="row">
+                <div class="col-lg-12">                   
+                    <div class="ibox ">                             
+                        <div class="ibox-content">
+                               <div class="col-sm-12"> 
+                        <div class="input-group">
+                        <div><span style="font-size:16px" th:text="'上报日期：'+${day}" th:day="${day}" id="daySpan">上报日期：</span>
+                        	<!-- <input class="timeInput" size="16" type="text" th:value="${day}" style="width:13em"> -->
+                        </div>
+                        <!-- <div class="float-left tooltip-demo col-sm-3" style="margin-left:10px">
+                        <span style="font-size:16px">单据编号：</span>
+                            <input class="djbhInput" type="text" value="" placeholder="请输入单据编号" style="border-color:#ddd">
+                           </div> -->
+                        <div class="float-left col-sm-3">
+                            <select  data-placeholder="暂无模板" id="wlMbSelect"  class="chosen-select mbSelect"  tabindex="2">
+                                <option th:each="mbList : ${mbList}" th:if="${mbList.id==mbId}" selected th:value="${mbList.id}" th:text="${mbList.mbmc}"></option>
+                                <option th:each="mbList : ${mbList}" th:if="${mbList.id!=mbId}" th:value="${mbList.id}" th:text="${mbList.mbmc}"></option>
+                            </select> 
+                           </div>
+                                      <div class="float-left tooltip-demo" style="position:absolute;right:25em"><button type="button" class="btn btn-w-m btn-info"  id="trialButton" onclick="toSaveBo()">保存</button></div>
+                                      <div class="float-left tooltip-demo" style="position:absolute;right:14em"><button type="button" class="btn btn-w-m btn-info"  id="seeHistoryOrder" onclick="toSeeTbHistory()">查看填报</button></div>
+                                      <div class="float-left tooltip-demo" style="position:absolute;right:3em"><button type="button" class="btn btn-w-m btn-info"  id="seeExcel" onclick="seeExcel()">查看报表</button></div>  
+                                   </div>
+                            </div>
+                            <table class="footable table table-stripped " data-limit-navigation="5" data-page-size="10" data-filter=#filter style="margin-top:1em">
+                                <thead>
+                                    <th  width="15%"  style="text-align:center">物料编码</th>
+                                    <th  width="15%"  style="text-align:center">物料名称</th>
+                                    <th  width="15%" style="text-align:center" >物料规格</th>
+                                    <th  width="15%" style="text-align:center" >计量单位</th>
+                                    <th  width="15%" style="text-align:center">预估产量</th>
+                                </tr>
+                                </thead>
+                                <tbody id="eatter">
+                                 
+                                <!-- <tr class="gradeX" th:if="${assessSituCount eq 0}">
+                                   <td colspan="12">暂无数据</td>
+                                </tr>  --> 
+                           <!--      <tr class="gradeX" th:each="plantypeList : ${plantypeList}"> -->
+                                 <tr  class="gradeX tabletrVal" th:each="wlList: ${wlList}" >
+                                    <td class="wlbmTd" th:text="${wlList.wlbm}"style="text-align:center">张三</td>
+                                    <td class="wlmcTd" th:text="${wlList.wlmc}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.wlgg==null?'':wlList.wlgg}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.wljl==null?'':wlList.wljl}"style="text-align:center">张三</td>
+                                    <td style="text-align:center">
+							 			<input  class="sqslInput" th:value="${wlList.wlsq==null?'':wlList.wlsq}" type="number" min="0" oninput="this.value = this.value.replace(/[^0-9]/g, '');" style="text-align:center">
+							 		</td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td  colspan="14">
+                                        <ul class="pagination float-right"></ul>
+                                    </td>
+                                </tr>
+                                
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>              
+<!--            <div id="eatter">
+           </div>  -->
+            
+        </body>
+    <div th:include="footerLinkJs::footLink"></div>
+    <script>
+            $(document).ready(function() {
+                $('.footable').footable();
+            	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true});
+          		  $("#wlMbSelect").change(function(){
+          			
+          			var mbId = $("#wlMbSelect").children('option:selected').val();
+          			mbId = encodeURI(mbId).replace(/\+/g,'%2B');
+          			window.location.href="/ecologicalProduce/showEcoProduce?mbId="+mbId;
+                    });
+          		var today = getBeforeDate(0);
+          		
+          		$('.timeInput').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			 startDay:today,
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		});
+          		
+          		/* $('.timeInput').val(today); */
+          		
+          		
+      		  }); 
+            
+
+            function getBeforeDate(n){//n为你要传入的参数，当前为0，前一天为-1，后一天为1
+                  var date = new Date() ;
+                  var year,month,day ;
+                  date.setDate(date.getDate()+n);
+                  year = date.getFullYear();
+                  month = date.getMonth()+1;
+                  day = date.getDate() ;
+                  s = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) ;
+                  return s ;
+                }
+            
+     //查看报表
+     function seeExcel(){
+    	 window.location.href="/reportForm/yieldReportForm";
+     }
+            //保存
+     function toSaveBo(){
+         var day = $('#daySpan').attr("day");
+         if(isEmpty(day)){
+        	 toastr.error("上报时间不能为空");
+        	 return;
+         }
+    	 /* var djbh = $(".djbhInput").get(0).value;
+    	 if(isEmpty(djbh)){
+    		 toastr.error("单据编号不能为空");
+    		 return;
+    	 } */
+    	 var trList = $(".tabletrVal");
+    	 if(0 == trList.length){
+     		toastr.error("没有数据需要保存");
+     		return;
+     	 }
+    	 var value="[";
+    	 for (var i=0;i<trList.length;i++) {
+    		 var wlbm = trList.eq(i).find(".wlbmTd").text();
+    		 var sbsl = trList.eq(i).find(".sqslInput").get(0).value;
+    		 if(sbsl == "0"){
+    			 continue;
+    		 }
+    	 if(i==0){
+			   value+="{\"wlbm\":\""+wlbm+"\",\"sbsl\":\""+sbsl+"\"}";
+		   }else{
+			   value+=",{\"wlbm\":\""+wlbm+"\",\"sbsl\":\""+sbsl+"\"}";
+		   }
+    	 }
+    	 value+="]";
+    	 //保存
+    	 $.ajax({
+             type: 'post',
+             url: "/ecologicalProduce/toSaveBh",
+             data: { val:value,day:day},
+             success: function (data) {
+          	   if(data=="保存成功"){
+      			   toastr.success(data);
+      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      		   }else{
+      			   toastr.error(data);
+      		   }
+             }
+         });
+     }
+            
+     function toSeeTbHistory(){
+    	 window.location.href="/ecologicalProduce/toSeeTbList";
+     }
+            
+   //判断是否为空
+     function isEmpty(obj){
+  	    if(typeof obj == "undefined" || obj == null || obj == ""){
+  	        return true;
+  	    }else{
+  	        return false;
+  	    }
+  	}
+   
+            </script>
+</html>

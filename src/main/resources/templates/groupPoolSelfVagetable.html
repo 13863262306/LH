@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<div th:include="header::headLink"></div>
+    <title>集团汇总分拨系统</title>
+    <style>
+    	input{
+    		width:7em;
+    		text-align:center;
+    	}
+    </style>
+	</head>
+<body style="background-color:#eee">
+            <div class="row wrapper border-bottom white-bg page-heading" style="padding-top: 15px"s>
+                <div class="col-lg-12">
+                    <span style="font-size: 22px; margin-top: 10px; margin-left: 10px"><strong>集团汇总分拨系统</strong></span>
+					<span style="position: absolute; right: 280px; top: 20px; font-size: 16px"th:text="${'组织：'+jtUser.companyName}"></span> 
+					<span style="position: absolute; right: 150px; top: 20px; font-size: 16px" th:text="${'用户：'+jtUser.name}" id="userNameSpan" th:uName="${jtUser.name}"></span> 
+					<!-- <a style="position: absolute; right: 70px; top: 20px; font-size: 16px" th:text="消息"></a> -->
+                </div>  <input style="display: none" id="pageTypeInput" th:value="${pageType}"></div>
+              <div class="animated" style="height:100%;background-color:#eee">
+            <div class="row">
+                <div class="col-lg-12">                   
+                    <div class="ibox ">                             
+                        <div class="ibox-content">
+                               <div class="col-sm-12"> 
+                        <div class="input-group">
+                        <div><span style="font-size:16px">申请日期：</span><input class="timeInput" size="16" type="text" th:value="${day}"  style="width:6em"></div>
+                        <!-- <div class="float-left tooltip-demo col-sm-3" style="margin-left:10px">
+                        <span style="font-size:16px">单据编号：</span>
+                            <input class="djbhInput" type="text" value="" placeholder="请输入单据编号" style="border-color:#ddd">
+                           </div> -->
+                        <div class="float-left col-sm-3">
+                            <select  data-placeholder="请选择酒店" id="jdSelect"  class="chosen-select jdSelect"  tabindex="2">
+                            <option  th:if="${jdId==null}" selected th:value="0" th:text="全部"></option>
+                            <option  th:if="${jdId!=null}" th:value="0" th:text="全部"></option>
+                                <option th:each="jd : ${jdList}" th:if="${jd.id==jdId}" selected th:value="${jd.id}" th:text="${jd.companyName}">部门奖金包上传</option>
+                                <option th:each="jd : ${jdList}" th:if="${jd.id!=jdId}" th:value="${jd.id}" th:text="${jd.companyName}">部门奖金包上传</option>
+                            </select> 
+                           </div> 
+                           <div class="float-left col-sm-2">
+                            <select  data-placeholder="请选择模板" id="mbSelect"  class="chosen-select mbSelect"  tabindex="2">
+                                <option th:each="mbs : ${mbs}" th:if="${mbs.id==mbId}" selected th:value="${mbs.id}" th:text="${mbs.mbmc}">部门奖金包上传</option>
+                                <option th:each="mbs : ${mbs}" th:if="${mbs.id!=mbId}" th:value="${mbs.id}" th:text="${mbs.mbmc}">部门奖金包上传</option>
+                            </select> 
+                           </div> 
+                           
+                         <!-- <div class="float-left tooltip-demo" style="margin-left:1%">
+                           <button type="button" class="btn btn-w-m btn-success"  id="turnDay" onclick="toChangeDay()">查看</button>
+                         </div> -->
+                        <br><br> </div>
+                         <!-- <div class="float-left tooltip-demo" style="position:absolute;left:3em">
+                           <button type="button" class="btn btn-w-m btn-info"  id="toStopJdSub" onclick="toSetJdSub(0)">开始分拨</button>
+                         </div>
+                         <div class="float-left tooltip-demo" style="position:absolute;left:14em">
+                           <button type="button" class="btn btn-w-m btn-info"  id="toOpeJdSub" onclick="toSetJdSub(1)">反分拨</button>
+                         </div> -->
+                         <div class="float-left tooltip-demo" style="position:absolute;left:3em">
+                           <button type="button" class="btn btn-w-m btn-info"  id="toSave" onclick="toSaveResult()">保存</button>
+                         </div>
+                         <div class="float-left tooltip-demo" style="position:absolute;left:14em">
+                           <button type="button" class="btn btn-w-m btn-info"  onclick="toSub()">提交</button>
+                         </div>
+                         <div class="float-left tooltip-demo" style="position:absolute;left:25em">
+                           <button type="button" class="btn btn-w-m btn-info"  onclick="toSeeExcel()">查看报表</button>
+                         </div>
+                         <div class="float-left tooltip-demo" style="position:absolute;left:36em">
+                           <button type="button" class="btn btn-w-m btn-info"  onclick="toSeeFHExcel()">仓库发货表</button>
+                         </div>
+                         
+                         <!--<div class="float-left tooltip-demo" style="margin-left:2%">
+                           <button type="button" class="btn btn-w-m btn-info"  onclick="toSeeJdbh()">查看报货单</button>
+                         </div> -->
+                                      <!-- <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="trialButton" onclick="toSaveBo()">保存</button></div>
+                                      <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="toBh" onclick="goOnBh()">继续报货</button></div> -->
+                                      <!-- <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="seeHistoryOrder" onclick="toSeeHistory()">查看历史订单</button></div> --> 
+                            </div>
+                            <table class="footable table table-stripped " data-limit-navigation="5" data-page-size="10" data-filter=#filter style="margin-top:3em">
+                                <thead id="tableHead">
+                                    <th  width="8%"  style="text-align:center">物料编码</th>
+                                    <th  width="9%"  style="text-align:center">物料名称</th>
+                                    <th  width="9%" style="text-align:center" >物料规格</th>
+                                    <th  width="6%" style="text-align:center" >计量单位</th>
+                                    <th  width="6%" style="text-align:center">申请数量</th>
+                                    <th  width="6%" style="text-align:center" class="fbslTh">分拨数量</th>
+                                    <th  width="6%" style="text-align:center" class="zcslTh">自产数量</th>
+                                    <!-- <th width="6%" style="text-align:center" class="ckfhTh">仓库发货</th>
+                                    <th  width="6%" style="text-align:center" class="ckslTh">库存数量</th> -->
+                                    <th  width="6%" style="text-align:center" class="cgslTh">采购数量</th>
+                                    <th width=8% style="text-align:center">申请日期</th>
+                                    <th width="15%" style="text-align:center">报货酒店</th>
+                                    <!-- <th width="12%" style="text-align:center">操作</th> -->
+                                	<th width="6%" style="text-align:center" class="goOnFbTh">是否继续分拨</th>
+                                </thead>
+                                <tbody id="eatter">
+                                 
+                                <tr class="gradeX" th:if="${jthzListSize eq 0}">
+                                   <td colspan="12">暂无数据</td>
+                                </tr>
+                           <!--      <tr class="gradeX" th:each="plantypeList : ${plantypeList}"> -->
+                                 <tr  class="gradeX tabletrVal" th:each="wlList: ${jthzList}"  th:if="${wlList.subState=='3'}" bgcolor="dbd9cb">
+                                 	
+                                    <td class="wlbmTd" th:text="${wlList.wlbm}"style="text-align:center">张三</td>
+                                    <td class="wlmcTd" th:text="${wlList.wlmc}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.wlgg==null?'':wlList.wlgg}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.jldw==null?'':wlList.jldw}"style="text-align:center">张三</td>
+                                    <td class="sqslTd" style="text-align:center" th:text="${wlList.sqsl==null?'':wlList.sqsl}"></td>
+                                    <td class="fbslTd" style="text-align:center">
+                                    	<input th:if="${wlList.subState=='1'}" disabled type="number" min="0" class="fbslInput" th:value="${wlList.fbsl==null?'0':wlList.fbsl}">
+                                    	<input th:if="${wlList.subState!='1'}" type="number" min="0" class="fbslInput" th:value="${wlList.fbsl==null?'0':wlList.fbsl}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"> 
+                                    </td>
+                                    <td class="zcslTd" th:text="${wlList.zcsl==null?'0':wlList.zcsl}" style="text-align:center"></td>
+                                    <!-- <td class="ckfhTd" style="text-align:center">
+                                    	<input th:if="${wlList.subState=='1'}" disabled type="number" min="0" class="ckfhInput" th:value="${wlList.ckfhsl==null?'0':wlList.ckfhsl}"> 
+                                    	<input th:if="${wlList.subState!='1'}" type="number" min="0" class="ckfhInput" th:value="${wlList.ckfhsl==null?'0':wlList.ckfhsl}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"> 
+                                    </td>
+                                    <td class="kcslTd" style="text-align:center"th:text="${wlList.kcsl==null?'0':wlList.kcsl}"></td> -->
+                                    <td class="cgslTd" style="text-align:center">
+                                    	<input th:if="${wlList.subState=='1'}" disabled type="number" min="0" class="cgslInput" th:value="${wlList.cgsl==null?'0':wlList.cgsl}">
+                                    	<input th:if="${wlList.subState!='1'}" type="number" min="0" class="cgslInput" th:value="${wlList.cgsl==null?'0':wlList.cgsl}" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                    </td>
+                                    
+                                    
+                                    <td th:text="${wlList.sqrq==null?'':wlList.sqrq}" style="text-align:center">
+                                    <td class="costCenterTd" th:text="${wlList.subCostCenter}" 
+                                    						th:subUser="${wlList.costCenterSubUser}" 
+                                    						th:mbId="${wlList.mbId}" 
+                                    						th:subTime="${wlList.costCenterSubTime}" 
+                                    						th:fhzz="${wlList.fhzz}" 
+                                    						th:jdId="${wlList.jdId}"
+                                    						th:cgzz="${wlList.cgzz}"
+                                    						th:customer="${wlList.isCustomer}"
+                                    						th:subState="${wlList.subState}"
+                                    						th:tableEntryId="${wlList.tableEntryId}"
+                                    						th:tableHeadId="${wlList.tableHeadId}"
+                                    						th:ckzz="${wlList.ckzz}"
+                                    						th:isZiCai="${wlList.isZiCai}"
+                                    						style="text-align:center">
+                                    </td>
+                                   <td class="goOnFbTd">
+	                                    <div class="switch switch-small checkbox-slider--b checkbox-slider-warning">
+										    <input th:if="${wlList.subState=='1'}" disabled  type="checkbox" class="twitchFbInput" value="0" style="width:2em;height:2em;"/>
+										    <input th:if="${wlList.subState!='1'}" type="checkbox" class="twitchFbInput switch-small" value="0" style="width:2em;height:2em;"/><span class="checkbox-slider--default"></span>
+										</div>
+                                    
+                                    </td>
+                                    <!-- <td style="text-align:center"><button type="button" th:attr="wlbm=${wlList.wlbm}" class="btn btn-w-m btn-info" onclick="toDetail(this)">查看</button></td> -->
+                                	<!-- <td><input name="status" type="checkbox" data-size="small"></td> -->
+                                </tr>
+                                <tr  class="gradeX tabletrVal" th:each="wlList: ${jthzList}"  th:if="${wlList.subState!='3'}">
+                                 	
+                                    <td class="wlbmTd" th:text="${wlList.wlbm}"style="text-align:center">张三</td>
+                                    <td class="wlmcTd" th:text="${wlList.wlmc}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.wlgg==null?'':wlList.wlgg}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.jldw==null?'':wlList.jldw}"style="text-align:center">张三</td>
+                                    <td class="sqslTd" style="text-align:center" th:text="${wlList.sqsl==null?'':wlList.sqsl}"></td>
+                                    <td class="fbslTd" style="text-align:center">
+                                    	<input th:if="${wlList.subState=='1'}" disabled type="number" min="0" class="fbslInput" th:value="${wlList.fbsl==null?'0':wlList.fbsl}">
+                                    	<input th:if="${wlList.subState!='1'}" type="number" min="0" class="fbslInput" th:value="${wlList.fbsl==null?'0':wlList.fbsl}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"> 
+                                    </td>
+                                    <td class="zcslTd" th:text="${wlList.zcsl==null?'0':wlList.zcsl}" style="text-align:center"></td>
+                                    <!-- <td class="ckfhTd" style="text-align:center">
+                                    	<input th:if="${wlList.subState=='1'}" disabled type="number" min="0" class="ckfhInput" th:value="${wlList.ckfhsl==null?'0':wlList.ckfhsl}"> 
+                                    	<input th:if="${wlList.subState!='1'}" type="number" min="0" class="ckfhInput" th:value="${wlList.ckfhsl==null?'0':wlList.ckfhsl}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"> 
+                                    </td>
+                                    <td class="kcslTd" style="text-align:center"th:text="${wlList.kcsl==null?'0':wlList.kcsl}"></td> -->
+                                    <td class="cgslTd" style="text-align:center">
+                                    	<input th:if="${wlList.subState=='1'}" disabled type="number" min="0" class="cgslInput" th:value="${wlList.cgsl==null?'0':wlList.cgsl}">
+                                    	<input th:if="${wlList.subState!='1'}" type="number" min="0" class="cgslInput" th:value="${wlList.cgsl==null?'0':wlList.cgsl}" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                    </td>
+                                    
+                                    
+                                    <td th:text="${wlList.sqrq==null?'':wlList.sqrq}" style="text-align:center">
+                                    <td class="costCenterTd" th:text="${wlList.subCostCenter}" 
+                                    						th:subUser="${wlList.costCenterSubUser}" 
+                                    						th:mbId="${wlList.mbId}" 
+                                    						th:subTime="${wlList.costCenterSubTime}" 
+                                    						th:fhzz="${wlList.fhzz}" 
+                                    						th:jdId="${wlList.jdId}"
+                                    						th:cgzz="${wlList.cgzz}"
+                                    						th:customer="${wlList.isCustomer}"
+                                    						th:subState="${wlList.subState}"
+                                    						th:tableEntryId="${wlList.tableEntryId}"
+                                    						th:tableHeadId="${wlList.tableHeadId}"
+                                    						th:ckzz="${wlList.ckzz}"
+                                    						th:isZiCai="${wlList.isZiCai}"
+                                    						style="text-align:center">
+                                    </td>
+                                   <td class="goOnFbTd">
+	                                    <div class="switch">
+										    <input th:if="${wlList.subState=='1'}" disabled  type="checkbox" class="twitchFbInput" value="0"/>
+										    <input th:if="${wlList.subState!='1'}" type="checkbox" class="twitchFbInput" value="0"/>
+										</div>
+                                    
+                                    </td>
+                                    <!-- <td style="text-align:center"><button type="button" th:attr="wlbm=${wlList.wlbm}" class="btn btn-w-m btn-info" onclick="toDetail(this)">查看</button></td> -->
+                                	<!-- <td><input name="status" type="checkbox" data-size="small"></td> -->
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td  colspan="14">
+                                        <ul class="pagination float-right"></ul>
+                                    </td>
+                                </tr>
+                                
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>              
+<!--            <div id="eatter">
+           </div>  -->
+            
+        </body>
+    <div th:include="footerLinkJs::footLink"></div>
+    <script>
+            $(document).ready(function() {
+                $('.footable').footable();
+            	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true});
+          		  /* $("#wlMbSelect").change(function(){
+          			window.location.href="/bh/showBh?mbId="+$("#wlMbSelect").children('option:selected').val();
+                    }); */
+          		var today = getBeforeDate(0);
+          		console.log(today);
+          		$('.timeInput').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			startDay:today,
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		});
+          		
+          		
+          		//根据后端传过来的pageType控制页面显示
+          	    var pageType=$("#pageTypeInput").val();
+          		console.log("pageType:"+pageType);
+          		//001青菜，002冻品
+          	/* if("001"==pageType){
+          			//设置
+          		$(".goOnFbTh").remove();
+          		$(".goOnFbTd").remove();
+          		//默认仓库发货数量=申请数量	
+          		$(".ckfhInput").each(function(){
+          			var ckfhValue = $(this).val();
+          			var sqslValue = $(this).parent().parent().find(".sqslTd").text();
+          			if(isEmpty(ckfhValue)){
+          				$(this).val(sqslValue);
+          			}
+          			
+          			calCgsl($(this).parent());
+          		})
+          		//分拨数量修改事件
+          		$(".fbslInput").each(function(){
+          			
+          			$(this).on("blur",function(){
+          				if($(this).val()<0){
+          					$(this).val($(this).attr("oldValue"));
+          				}
+          				var zcsl = ($(this).parent().next().text())*1;
+          				 if(($(this).val())*1 >zcsl){
+          					toastr.error("不能大于自产数量");
+          					$(this).val($(this).attr("oldValue"));
+          					return;
+          				} 
+          				calCgsl($(this).parent().parent());
+          			})
+          		})
+          		
+          		//仓库发货数量修改事件
+          		$(".ckfhInput").each(function(){
+          			$(this).on("blur",function(){
+          				calCgsl($(this).parent().parent());
+          			})
+          		})
+          	}else if("002"==pageType){
+          		$(".goOnFbTh").remove();
+          		$(".goOnFbTd").remove();
+          			$(".fbslTh").remove();
+          			$(".zcslTh").remove();
+          			$(".fbslTd").remove();
+          			$(".zcslTd").remove();
+          			$(".cgslTh").remove();
+          			$(".cgslTd").remove();
+          			
+          			//仓库发货数量=申请数量
+          			$(".ckfhInput").each(function(){
+          			var ckfhValue = $(this).val();
+          			var sqslValue = $(this).parent().parent().find(".sqslTd").text();
+          			if(isEmpty(ckfhValue) || ckfhValue==0){
+          				$(this).val(sqslValue);
+          			}
+          			
+          		}) 
+          	}else if("003"==pageType){
+          		$(".goOnFbTh").remove();
+          		$(".goOnFbTd").remove();
+          			$(".fbslTh").remove();
+          			$(".fbslTd").remove();
+          			
+          			$(".zcslTh").remove();
+          			$(".zcslTd").remove();
+          			
+          			$(".ckfhTh").remove();
+          			$(".ckfhTd").remove();
+          			
+          			
+          			$(".ckslTh").remove();
+          			$(".kcslTd").remove(); 
+          			
+          			$(".cgslInput").each(function(){
+              			var cgslValue = $(this).val();
+              			var sqslValue = $(this).parent().parent().find(".sqslTd").text();
+              			if(isEmpty(cgslValue) || cgslValue==0){
+              				$(this).val(sqslValue);
+              			}
+          			})
+          	}else if("004"==pageType){
+          		$(".ckfhTh").remove();
+      			$(".ckfhTd").remove();
+      			$(".ckslTh").remove();
+      			$(".kcslTd").remove();
+          		} */
+          			
+          		$("input").each(function(){
+          			$(this).on("click",function(){
+          				$(this).attr("oldValue",$(this).val());
+          			})
+          		})
+          		$("input").each(function(){
+          			$(this).on("blur",function(){
+          				if($(this).val() <0){
+          					$(this).val($(this).attr("oldValue"));
+          				}
+          				$(this).attr("oldValue",$(this).val());
+          			})
+          		})
+          		
+          		/* $('.timeInput').val(today); */
+          		//计算采购数量：
+          		
+          		
+          		
+          		$("#mbSelect").change(function(){
+          			var day = $('.timeInput').val();
+              	  var jdId=$('#jdSelect').val();
+              	  var mbId=$('#mbSelect').val();
+              	mbId = encodeURI(mbId).replace(/\+/g,'%2B');
+              	jdId = encodeURI(jdId).replace(/\+/g,'%2B');
+              	  if(isEmpty(day)){
+                   	 toastr.error("申请时间不能为空");
+                   	 return;
+                    }
+              	  window.location.href="/groupHz/showGroupPool?day="+day+"&jdId="+jdId+"&mbId="+mbId;
+          			
+                    });
+          		
+          		$("#jdSelect").change(function(){
+          			var day = $('.timeInput').val();
+              	  var jdId=$('#jdSelect').val();
+              	  var mbId=$('#mbSelect').val();
+              	mbId = encodeURI(mbId).replace(/\+/g,'%2B');
+              	jdId = encodeURI(jdId).replace(/\+/g,'%2B');
+              	  if(isEmpty(day)){
+                   	 toastr.error("申请时间不能为空");
+                   	 return;
+                    }
+              	  window.location.href="/groupHz/showGroupPool?day="+day+"&jdId="+jdId+"&mbId="+mbId;
+          			
+                    });
+          		
+
+          		 $('[name="status"]').bootstrapSwitch({
+          				onText:"启动",
+          				offText:"停止",
+          				onColor:"success",
+          				offColor:"info",
+          				size:"small",
+          				onSwitchChange:function(event,state){
+          					if(state==true){
+          						$(this).val("1");
+          					}else{
+          						$(this).val("2");
+          					}
+          				} 
+          			}) 
+          		
+          			
+          			
+          			
+          			
+          
+          	 $(".twitchFbInput").each(function(){
+          		
+          		
+          		$(this).bootstrapSwitch('onText','是').bootstrapSwitch('offText','否').bootstrapSwitch("onColor",'success').bootstrapSwitch("offColor",'warning')
+          		.bootstrapSwitch('size','normal').bootstrapSwitch('state',false);
+          		$(this).bootstrapSwitch("onSwitchChange",function(event,state){
+          		    
+          		    if(state==true){
+          		        $(this).val(1);
+          		        //text='开启';
+          		    }else{
+          		    	$(this).val(0);
+          		        //text='关闭';
+          		    } 
+          		    //alert("event"+event+",state:"+state);
+          		})
+          	}) 
+          		
+            })	
+            
+            //查看报表
+            function toSeeExcel(){
+            	var userName = $("#userNameSpan").attr("uName");
+            	window.location.href="/reportForm/groupReportForm?username="+userName;
+            }
+            
+            
+            function toSeeFHExcel(){
+            	window.location.href="/reportForm/deliveryReportForm";
+            }
+            //开始分拨：
+            function toSetJdSub(inputKey){
+            	var day = $('.timeInput').val();
+            	//获取模板
+            	
+            	
+            	var mbIds = "";
+          		$("#mbSelect option").each(function(){
+          			var aMbId = $(this).val();
+          			mbIds+=aMbId;
+          			mbIds+=";";
+          		})
+          		
+          		
+          		
+          		var jdIds = "";
+          		$("#jdSelect option").each(function(){
+          			var aJdId = $(this).val();
+          			jdIds+=aJdId;
+          			jdIds+=";";
+          		})
+          		
+          		
+          		
+          		
+            	$.ajax({
+                    type: 'post',
+                    url: "/groupHz/setCostCenterInput",
+                    data: { mbIds:mbIds,day:day,inputKey:inputKey,jdIds:jdIds},
+                    success: function (data) {
+                 	   if(data=="设置成功"){
+             			   toastr.success(data);
+             			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+             		   }else{
+             			   toastr.error(data);
+             		   }
+                    }
+                });
+            	
+            	
+            }
+            
+            /* //反分拨
+            function toOpeJdSub(){
+            	var day = $('.timeInput').val();
+				//获取模板
+            	var mbIds = "";
+          		$("#mbSelect option").each(function(){
+          			var aMbId = $(this).val();
+          			mbIds+=aMbId;
+          			mbIds+=";";
+          		})
+          		
+          		$.ajax({
+                    type: 'post',
+                    url: "/groupHz/setCostCenterInput",
+                    data: { mbIds:mbIds,day:day,inputKey:1},
+                    success: function (data) {
+                 	   if(data=="设置成功"){
+             			   toastr.success(data);
+             			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+             		   }else{
+             			   toastr.error(data);
+             		   }
+                    }
+                });
+            } */
+            
+            //计算采购数量
+            function calCgsl(ele){
+            	var sqsl = (ele.find(".sqslTd").text())*1;
+            	if(isEmpty(sqsl)){
+            		sqsl=0;
+            	}
+            	var fbsl = (ele.find(".fbslInput").val())*1;
+            	if(isEmpty(fbsl)){
+            		fbsl=0;
+            	}
+            	var ckfhsl = (ele.find(".ckfhInput").val())*1;
+            	if(isEmpty(ckfhsl)){
+            		ckfhsl=0;
+            	}
+            	
+            	var cgsl = sqsl-fbsl-ckfhsl;
+            	if(cgsl<0){
+            		toastr.error("不能输入负数");
+            		return;
+            	}
+            	ele.find(".cgslInput").val(cgsl);
+            	
+            }
+            function getBeforeDate(n){//n为你要传入的参数，当前为0，前一天为-1，后一天为1
+                  var date = new Date() ;
+                  var year,month,day ;
+                  date.setDate(date.getDate()+n);
+                  year = date.getFullYear();
+                  month = date.getMonth()+1;
+                  day = date.getDate() ;
+                  s = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) ;
+                  return s ;
+                }
+            
+          function toChangeDay(){
+        	  var day = $('.timeInput').val();
+        	  var jdId=$('#jdSelect').val();
+        	  var mbId=$('#mbSelect').val();
+        	  if(isEmpty(day)){
+             	 toastr.error("申请时间不能为空");
+             	 return;
+              }
+        	  window.location.href="/groupHz/showGroupPool?day="+day+"&jdId="+jdId+"&mbId="+mbId;
+          }
+          
+          
+          function toDetail(ele){
+        	  var wlbm = $(ele).attr("wlbm");
+        	  wlbm = encodeURI(wlbm).replace(/\+/g,'%2B');
+        	  var day= $('.timeInput').val();
+        	  window.location.href="/jdhz/oneDetail?day="+day+"&wlbm="+wlbm;
+          }
+          //形成报货单
+          function toNewJdbh(){
+        	  var day = $('.timeInput').val();
+        	  var trList = $(".tabletrVal");
+         	 if(0 == trList.length){
+          		toastr.error("没有数据需要保存");
+          		return;
+          	 }
+         	 var value="[";
+         	 for (var i=0;i<trList.length;i++) {
+         		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+         		var shsl = trList.eq(i).find(".shslInput").get(0).value;
+         		var wlbm = trList.eq(i).find(".wlbmTd").text();
+         	 if(i==0){
+     			   value+="{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\",\"shsl\":\""+shsl+"\"}";
+     		   }else{
+     			   value+=",{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\",\"shsl\":\""+shsl+"\"}";
+     		   }
+         	 }
+         	 value+="]";
+         	 
+         	 
+         	 $.ajax({
+                 type: 'post',
+                 url: "/jdhz/newJdBh",
+                 data: { val:value,day:day},
+                 success: function (data) {
+              	   if(data=="保存成功"){
+          			   toastr.success(data);
+          			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+          		   }else{
+          			   toastr.error(data);
+          		   }
+                 }
+             });
+          }
+            //保存
+     /* function toSaveBo(){
+         var day = $('.timeInput').val();
+         if(isEmpty(day)){
+        	 toastr.error("申请时间不能为空");
+        	 return;
+         }
+    	 var djbh = $(".djbhInput").get(0).value;
+    	 if(isEmpty(djbh)){
+    		 toastr.error("单据编号不能为空");
+    		 return;
+    	 }
+    	 var trList = $(".tabletrVal");
+    	 if(0 == trList.length){
+     		toastr.error("没有数据需要保存");
+     		return;
+     	 }
+    	 var value="[";
+    	 for (var i=0;i<trList.length;i++) {
+    		 var wlbm = trList.eq(i).find(".wlbmTd").text();
+    		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+    	 if(i==0){
+			   value+="{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }else{
+			   value+=",{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }
+    	 }
+    	 value+="]";
+    	 //保存
+    	 $.ajax({
+             type: 'post',
+             url: "/bh/toSaveBh",
+             data: { val:value,djbh:djbh,day:day},
+             success: function (data) {
+          	   if(data=="保存成功"){
+      			   toastr.success(data);
+      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      		   }else{
+      			   toastr.error(data);
+      		   }
+             }
+         });
+     } */
+     
+     
+     
+     
+     function toSaveResult(){
+    	 var day = $('.timeInput').val();
+         if(isEmpty(day)){
+        	 toastr.error("申请时间不能为空");
+        	 return;
+         }
+         var trList = $(".tabletrVal");
+     	 if(0 == trList.length){
+      		toastr.error("没有数据需要保存");
+      		return;
+      	 }
+     	var value="[";
+   	 for (var i=0;i<trList.length;i++) {
+   		 //var costCenterSubUser = trList.eq(i).find(".").attr("subUser");
+   		 //var mbId = trList.eq(i).find(".costCenterTd").attr("mbId");
+   		//var subTime = trList.eq(i).find(".costCenterTd").attr("subTime");
+   		 //var costCenter = trList.eq(i).find(".costCenterTd").text();
+   		//var jdId = trList.eq(i).find(".costCenterTd").attr("jdId");
+   		 //var wlbm = trList.eq(i).find(".wlbmTd").text();
+   		 //var sqsl = trList.eq(i).find(".sqslTd").text();
+   		 //var shsl = trList.eq(i).find(".shslTd").text();
+   		//分拨数量
+   		var fbsl=0;
+   	 	var fbslInput = trList.eq(i).find(".fbslInput");
+   	 	if(fbslInput.length != 0){
+   		fbsl = trList.eq(i).find(".fbslInput").get(0).value;
+		 }
+   		 
+   	 	//自产数量
+   	 	var zcsl=0;
+		var zcslTd = trList.eq(i).find(".zcslTd");
+		if(zcslTd.length != 0){
+			zcsl = trList.eq(i).find(".zcslTd").text();
+		 }
+		
+		//仓库发货数量
+		/* var ckfhsl=0;
+   		var ckfhslInput=trList.eq(i).find(".ckfhInput");
+   		if(ckfhslInput.length != 0){
+   			ckfhsl = trList.eq(i).find(".ckfhInput").get(0).value;
+   		 } */
+   		
+   		//库存数量
+   		/* var kcsl=0;
+   		var kcslTd=trList.eq(i).find(".kcslTd");
+   		if(kcslTd.length != 0){
+   			kcsl = trList.eq(i).find(".kcslTd").text();
+   		 } */
+   		
+   		//采购数量
+   		var cgsl=0;
+   		var cgslInput = trList.eq(i).find(".cgslInput");
+   		if(cgslInput.length != 0){
+   			cgsl = trList.eq(i).find(".cgslInput").get(0).value;
+   		}
+   		
+   		
+   		var jdmc = trList.eq(i).find(".costCenterTd").text()
+   		var fhzz = trList.eq(i).find(".costCenterTd").attr("fhzz");
+   		var cgzz = trList.eq(i).find(".costCenterTd").attr("cgzz");
+   		var isCustomer= trList.eq(i).find(".costCenterTd").attr("customer");
+   		var tableEntryId = trList.eq(i).find(".costCenterTd").attr("tableEntryId");
+   	 if(i==0){
+			   value+="{\"tableEntryId\":\""+tableEntryId+"\",\"jdmc\":\""+jdmc+"\",\"fbsl\":\""+fbsl+"\",\"zcsl\":\""+zcsl+"\",\"cgsl\":\""+cgsl+"\",\"cgzz\":\""+cgzz+"\",\"fhzz\":\""+fhzz+"\"}";
+		   }else{
+			   value+=",{\"tableEntryId\":\""+tableEntryId+"\",\"jdmc\":\""+jdmc+"\",\"fbsl\":\""+fbsl+"\",\"zcsl\":\""+zcsl+"\",\"cgsl\":\""+cgsl+"\",\"cgzz\":\""+cgzz+"\",\"fhzz\":\""+fhzz+"\"}";
+		   }
+   	 
+   	/* if(i==0){
+		   value+="{\"wlbm\":\""+wlbm+"\",\"ckfhsl\":\""+ckfhsl+"\",\"isCustomer\":\""+isCustomer+"\",\"cgzz\":\""+cgzz+"\",\"fhzz\":\""+fhzz+"\",\"jdId\":\""+jdId+"\",\"zcsl\":\""+zcsl+"\",\"kcsl\":\""+kcsl+"\",\"cgsl\":\""+cgsl+"\",\"fbsl\":\""+fbsl+"\",\"subTime\":\""+subTime+"\",\"mbId\":\""+mbId+"\",\"sqsl\":\""+sqsl+"\",\"costCenterSubUser\":\""+costCenterSubUser+"\",\"costCenter\":\""+costCenter+"\",\"shsl\":\""+shsl+"\"}";
+	   }else{
+		   value+=",{\"wlbm\":\""+wlbm+"\",\"ckfhsl\":\""+ckfhsl+"\",\"isCustomer\":\""+isCustomer+"\",\"cgzz\":\""+cgzz+"\",\"fhzz\":\""+fhzz+"\",\"jdId\":\""+jdId+"\",\"zcsl\":\""+zcsl+"\",\"kcsl\":\""+kcsl+"\",\"cgsl\":\""+cgsl+"\",\"fbsl\":\""+fbsl+"\",\"subTime\":\""+subTime+"\",\"mbId\":\""+mbId+"\",\"sqsl\":\""+sqsl+"\",\"costCenterSubUser\":\""+costCenterSubUser+"\",\"costCenter\":\""+costCenter+"\",\"shsl\":\""+shsl+"\"}";
+	   } */
+   	 }
+   	 value+="]";
+	 $.ajax({
+         type: 'post',
+         url: "/groupHz/saveJthzOnly",
+         data: { val:value,day:day},
+         success: function (data) {
+      	   if(data=="保存成功"){
+  			   toastr.success(data);
+  			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+  		   }else{
+  			   toastr.error(data);
+  		   }
+         }
+     });
+     }
+     
+     
+     
+     //提交
+     function toSub(){
+    	 
+    	 qikoo.dialog.confirm('是否确认修改完毕并提交？',function(){
+    	 
+    	 var day = $('.timeInput').val();
+         if(isEmpty(day)){
+        	 toastr.error("申请时间不能为空");
+        	 return;
+         }
+         var trList = $(".tabletrVal");
+     	 if(0 == trList.length){
+      		toastr.error("没有数据需要提交");
+      		return;
+      	 }
+     	var value="[";
+   	 for (var i=0;i<trList.length;i++) {
+   		var subState = trList.eq(i).find(".costCenterTd").attr("subState");
+   		if("1"==subState){
+   			continue;
+   		}
+   		 var costCenterSubUser = trList.eq(i).find(".costCenterTd").attr("subUser");
+   		 var mbId = trList.eq(i).find(".costCenterTd").attr("mbId");
+   		var subTime = trList.eq(i).find(".costCenterTd").attr("subTime");
+   		 var costCenter = trList.eq(i).find(".costCenterTd").text();
+   		var jdId = trList.eq(i).find(".costCenterTd").attr("jdId");
+   		var jdmc = trList.eq(i).find(".costCenterTd").text();
+   		 var wlbm = trList.eq(i).find(".wlbmTd").text();
+   		 var sqsl = trList.eq(i).find(".sqslTd").text();
+   		 //var shsl = trList.eq(i).find(".shslTd").text();
+   		 //var kcsl = trList.eq(i).find(".kcslTd").text();
+   		
+   		 
+   		var cgsl=0;
+   	 	var cgslInput = trList.eq(i).find(".cgslInput");
+   	 	if(cgslInput.length != 0){
+   	 	var cgsl = trList.eq(i).find(".cgslInput").get(0).value;
+		 }
+   		
+  		var fbsl=0;
+   	 	var fbslInput = trList.eq(i).find(".fbslInput");
+   	 	if(fbslInput.length != 0){
+   		fbsl = trList.eq(i).find(".fbslInput").get(0).value;
+		 }
+   	 	
+  		var zcsl=0;
+  		var zcslTd = trList.eq(i).find(".zcslTd");
+  		if(zcslTd.length != 0){
+  			zcsl = trList.eq(i).find(".zcslTd").text();
+  		 }
+  		
+  		/* var ckfhsl=0;
+  		var ckfhInput = trList.eq(i).find(".ckfhInput");
+  		if(ckfhInput.length != 0){
+  		 ckfhsl = trList.eq(i).find(".ckfhInput").get(0).value;
+  		 } */
+   		 
+   		 
+   		 
+   		var fhzz = trList.eq(i).find(".costCenterTd").attr("fhzz");
+   		var cgzz = trList.eq(i).find(".costCenterTd").attr("cgzz");
+   		var ckzz = trList.eq(i).find(".costCenterTd").attr("ckzz");
+   		var isCustomer= trList.eq(i).find(".costCenterTd").attr("customer");
+   		var isZiCai= trList.eq(i).find(".costCenterTd").attr("isZiCai");
+   		var tableEntryId = trList.eq(i).find(".costCenterTd").attr("tableEntryId");
+   		var tableHeadId = trList.eq(i).find(".costCenterTd").attr("tableHeadId");
+   		var goOnFb = trList.eq(i).find(".twitchFbInput").val();
+   		if(i==0){
+			   value+="{\"wlbm\":\""+wlbm+"\",\"isZiCai\":\""+isZiCai+"\",\"goOnFb\":\""+goOnFb+"\",\"jdmc\":\""+jdmc+"\",\"tableHeadId\":\""+tableHeadId+"\",\"tableEntryId\":\""+tableEntryId+"\",\"isCustomer\":\""+isCustomer+"\",\"cgzz\":\""+cgzz+"\",\"ckzz\":\""+ckzz+"\",\"fhzz\":\""+fhzz+"\",\"jdId\":\""+jdId+"\",\"zcsl\":\""+zcsl+"\",\"cgsl\":\""+cgsl+"\",\"fbsl\":\""+fbsl+"\",\"subTime\":\""+subTime+"\",\"mbId\":\""+mbId+"\",\"sqsl\":\""+sqsl+"\",\"costCenterSubUser\":\""+costCenterSubUser+"\",\"costCenter\":\""+costCenter+"\"}";
+		   }else{
+			   value+=",{\"wlbm\":\""+wlbm+"\",\"isZiCai\":\""+isZiCai+"\",\"goOnFb\":\""+goOnFb+"\",\"jdmc\":\""+jdmc+"\",\"tableHeadId\":\""+tableHeadId+"\",\"tableEntryId\":\""+tableEntryId+"\",\"isCustomer\":\""+isCustomer+"\",\"cgzz\":\""+cgzz+"\",\"ckzz\":\""+ckzz+"\",\"fhzz\":\""+fhzz+"\",\"jdId\":\""+jdId+"\",\"zcsl\":\""+zcsl+"\",\"cgsl\":\""+cgsl+"\",\"fbsl\":\""+fbsl+"\",\"subTime\":\""+subTime+"\",\"mbId\":\""+mbId+"\",\"sqsl\":\""+sqsl+"\",\"costCenterSubUser\":\""+costCenterSubUser+"\",\"costCenter\":\""+costCenter+"\"}";
+		   }
+   		
+   	/*  if(i==0){
+			   value+="{\"wlbm\":\""+wlbm+"\",\"jdmc\":\""+jdmc+"\",\"tableHeadId\":\""+tableHeadId+"\",\"tableEntryId\":\""+tableEntryId+"\",\"ckfhsl\":\""+ckfhsl+"\",\"isCustomer\":\""+isCustomer+"\",\"cgzz\":\""+cgzz+"\",\"ckzz\":\""+ckzz+"\",\"fhzz\":\""+fhzz+"\",\"jdId\":\""+jdId+"\",\"zcsl\":\""+zcsl+"\",\"kcsl\":\""+kcsl+"\",\"cgsl\":\""+cgsl+"\",\"fbsl\":\""+fbsl+"\",\"subTime\":\""+subTime+"\",\"mbId\":\""+mbId+"\",\"sqsl\":\""+sqsl+"\",\"costCenterSubUser\":\""+costCenterSubUser+"\",\"costCenter\":\""+costCenter+"\"}";
+		   }else{
+			   value+=",{\"wlbm\":\""+wlbm+"\",\"jdmc\":\""+jdmc+"\",\"tableHeadId\":\""+tableHeadId+"\",\"tableEntryId\":\""+tableEntryId+"\",\"ckfhsl\":\""+ckfhsl+"\",\"isCustomer\":\""+isCustomer+"\",\"cgzz\":\""+cgzz+"\",\"ckzz\":\""+ckzz+"\",\"fhzz\":\""+fhzz+"\",\"jdId\":\""+jdId+"\",\"zcsl\":\""+zcsl+"\",\"kcsl\":\""+kcsl+"\",\"cgsl\":\""+cgsl+"\",\"fbsl\":\""+fbsl+"\",\"subTime\":\""+subTime+"\",\"mbId\":\""+mbId+"\",\"sqsl\":\""+sqsl+"\",\"costCenterSubUser\":\""+costCenterSubUser+"\",\"costCenter\":\""+costCenter+"\"}";
+		   } */
+   	 }
+   	 value+="]";
+     	//alert(value);
+	 $.ajax({
+         type: 'post',
+         url: "/groupHz/saveJthz",
+         data: { val:value,day:day},
+         success: function (data) {
+      	   if(data=="提交成功"){
+  			   toastr.success(data);
+  			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+  			   window.location.reload();
+  		   }else{
+  			   toastr.error(data);
+  		   }
+         }
+     });
+     
+    	 },function(){
+ 		});	       	  
+     	
+     }
+     
+     
+    //查看报货单
+    function toSeeJdbh(){
+    	 var day = $('.timeInput').val();
+    	 //获取本酒店标识
+    	 window.location.href="/jdhz/showJdBh?day="+day;
+     }
+            
+   //判断是否为空
+     function isEmpty(obj){
+  	    if(typeof obj == "undefined" || obj == null || obj == ""){
+  	        return true;
+  	    }else{
+  	        return false;
+  	    }
+  	}
+   
+   
+   
+   
+   
+            </script>
+</html>

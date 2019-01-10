@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="lanhai.dao.BaoHuoDao">
+	<select id="selectUserByFNumber" parameterType="map" resultType="lanhai.entity.BhUser">
+	
+	
+	<!-- select U.fnumber as name,
+		   U.fid as pmId,
+		   U.fname_l2 as userNumber,
+		   tob.FID as costCenterId,
+		   tob.FNAME_L2 as costCenterName,
+		   
+		   U.FTYPE AS userType
+		   
+	FROM t_pm_user U
+        left join  T_ORG_BaseUnit tob on tob.fid=U.fdeforgunitid
+				where U.fnumber=#{userName} -->
+	
+	
+	
+	
+	
+	
+	
+	select U.fnumber as name,
+		   U.fid as pmId,
+			
+		   PER.FNUMBER as userNumber,
+		   ORGCOST.FID as costCenterId,
+		   ORGCOST.FNAME_L2 as costCenterName,
+		   ORGCOST.FDISPLAYNAME_L2 as companyAndCostCenterName,
+		   B.FID as positionId,
+		   B.FNAME_L2 AS position,
+		   U.FTYPE AS userType,
+		   ORGCOST.FLONGNUMBER as longNumber
+	FROM t_pm_user U
+        left join  T_BD_PERSON PER on u.fpersonid=PER.fid
+		left join T_ORG_PositionMember C on C.FPERSONID = PER.FID and c.FIsPrimary='1'
+		left join T_ORG_Position B on B.FID=C.FPOSITIONID
+		left JOIN t_org_admin ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID
+		
+	WHERE U.fnumber=#{userName}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- select U.fnumber as name,
+		   U.fid as pmId,
+			
+		   PER.FNUMBER as userNumber,
+		   ORGCOST.FID as costCenterId,
+		   ORGCOST.FNAME_L2 as costCenterName,
+		   ORGCOST.FDISPLAYNAME_L2 as companyAndCostCenterName,
+		   B.FID as positionId,
+		   B.FNAME_L2 AS position,
+		   U.FTYPE AS userType,
+		   ORGCOST.FLONGNUMBER as longNumber
+	FROM t_pm_user U
+        left join  T_BD_PERSON PER on u.fpersonid=PER.fid
+		left join T_ORG_PositionMember C on C.FPERSONID = PER.FID and c.FIsPrimary='1'
+		left join T_ORG_Position B on B.FID=C.FPOSITIONID
+		left JOIN T_ORG_COSTCENTER ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID
+		
+	WHERE U.fnumber=#{userName}  -->
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- select U.fnumber as name,
+		   U.fid as pmId,
+		   PER.Fisprimary,
+		   PER.FNUMBER as userNumber,
+		   ORGCOST.FID as costCenterId,
+		   ORGCOST.FNAME_L2 as costCenterName,
+		   ORGCOST.FDISPLAYNAME_L2 as companyAndCostCenterName,
+		   B.FID as positionId,
+		   B.FNAME_L2 AS position,
+		   U.FTYPE AS userType,
+		   ORGCOST.FLONGNUMBER as longNumber
+	FROM t_pm_user U
+        left join  T_BD_PERSON PER on u.fpersonid=PER.fid
+		left join T_ORG_PositionMember C on C.FPERSONID = PER.FID
+		left join T_ORG_Position B on B.FID=C.FPOSITIONID
+		left JOIN T_ORG_COSTCENTER ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID
+		
+	WHERE U.fnumber=#{userName}
+	 -->
+	
+	
+	<!-- select PER.FNAME_L1 as name,
+		   PER.FNUMBER as userNumber,
+		   ORGCOST.FID as costCenterId,
+		   ORGCOST.FDISPLAYNAME_L2 as costCenterName,
+		   B.FID as positionId,
+		   B.FNAME_L2 AS position
+	FROM T_BD_PERSON PER 
+	inner join T_ORG_PositionMember C on C.FPERSONID = PER.FID
+	inner join T_ORG_Position B on B.FID=C.FPOSITIONID
+	INNER JOIN T_ORG_COSTCENTER ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID
+	WHERE PER.FNAME_L2=#{userName} -->
+	</select>
+	
+	<select id="selectMbs"  resultType="lanhai.entity.Mblx">
+		select FID as id,FNUMBER as mbmc from CT_CUS_LHBHTEMPLATE order by fid
+	</select>
+	
+	
+	
+	<select id="selectWlByMbId" parameterType="map" resultType="lanhai.entity.WL_list">
+	select tbm.fnumber as wlbm,
+		CCL.CFWLNAME as wlmc,
+		tbm.FModel as wlgg,
+        A.WLJL AS WLJL,
+        B.MONTHAVG AS lastMonthAvg,
+        C.YEARAVE AS sameMonthOfLastYearAvg,
+        CCL.FPARENTID as mbId
+		from CT_CUS_LHBHTEMPLATEENTRY CCL
+		left join T_BD_Material tbm on tbm.fid=ccl.cfwlid
+		full JOIN (SELECT FID,MAX(fname_l2) AS WLJL from t_bd_measureunit GROUP BY FID) A ON A.fid=tbm.FBASEUNIT
+		LEFT JOIN (SELECT BWL.WLBH,AVG(NVL(BWL.WLSQ,0)) AS MONTHAVG FROM BH_WL_LIST BWL,BH_LIST BL WHERE BWL.DJBH=BL.DJBH AND SUBSTR(BL.SQRQ,1,7) = #{lastMonth} AND BL.SUB_STATE='1' GROUP BY WLBH) B ON B.WLBH=CCL.CFWLID
+		LEFT JOIN (SELECT BWL.WLBH,AVG(NVL(BWL.WLSQ,0)) AS YEARAVE FROM BH_WL_LIST BWL,BH_LIST BL WHERE BWL.DJBH=BL.DJBH AND SUBSTR(BL.SQRQ,1,7) = #{sameMonthOfLastYear} AND BL.SUB_STATE='1' GROUP BY WLBH) C ON C.WLBH=CCL.CFWLID
+		where CCL.CFFQTY='1'
+		<if test="mbIds!=null"> and FPARENTID in
+			<foreach collection="mbIds" index="index" item="mbIds" open="(" separator="," close=")">
+        						#{mbIds}  
+        	</foreach>
+		</if>
+		order by tbm.fnumber
+	
+	
+		<!-- select CCL.CFWLID as wlbm,
+				CCL.CFWLNAME as wlmc,
+				CCL.CFWLGUIGE as wlgg,
+				(SELECT fname_l2 from t_bd_measureunit where FID=CCL.CFWLUNITEID) as wljl
+		from CT_CUS_LHBHTEMPLATEENTRY CCL -->
+		<!-- <if test="mbId!=null">where FPARENTID=#{mbId}</if> -->
+		<!-- select * from  WL_LIST <if test="mbId!=null">where FID=#{mbId}</if> -->
+	</select>
+	
+	<select id="selectWlOnlyByMbId" parameterType="map" resultType="lanhai.entity.WL_list">
+		select CCL.CFWLID as wlbm,
+				CCL.CFWLNAME as wlmc,
+				CCL.CFWLGUIGE as wlgg,
+				(SELECT fname_l2 from t_bd_measureunit where FID=CCL.CFWLUNITEID) as wljl
+		from CT_CUS_LHBHTEMPLATEENTRY CCL
+		<if test="mbId!=null">where FPARENTID=#{mbId}</if>
+	</select>
+	
+	<insert id="saveBhWl" parameterType="map">
+		insert into  BH_WL_LIST (DJBH,WLBH,WLSQ) values(#{djbh},#{wlbm},#{sqsl})
+	</insert>
+	
+	<insert id="saveBhList" parameterType="map">
+		insert into BH_LIST (SQRQ,DJBH,SUB_USER,SUB_COSTCENTER,SUB_STATE,MBID,ORG_ID,SUB_COSTCENTER_ID) 
+		values(#{day},#{djbh},#{user},#{subCostCenter},#{subState},#{mbId},#{companyId},#{subCostCenterId})
+	</insert>
+	
+	<select id="selectCountOfDjbh" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(DJBH) from bh_list where DJBH=#{djbh}
+	</select>
+	<select id="selectBhByDay" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select bwl.wlbh as wlbm,
+		   tbml.fname_l2 as wlmc,
+		   tbml.FModel as wlgg,
+           TBM.fname_l2 as jldw,
+		   bl.sqrq as sqrq,
+           bl.SUB_USER as subUser,
+           bl.SUB_COSTCENTER as subCostCenter,
+		   bl.SUB_STATE as subState,
+		   bl.MBID as mbId,
+		   bwl.wlsq as sqsl,
+		   bwl.shsl as shsl,
+		   bl.SUB_TIME as costCenterSubTime,
+		   bl.djbh 
+	FROM bh_wl_list BWL
+		 left join bh_list BL on bwl.djbh=bl.djbh 
+		 left join T_BD_Material tbml on tbml.fnumber=bwl.wlbh
+		 left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 
+	where bl.sub_user=#{user} 
+	<if test="day!=null">
+		and bl.sqrq=#{day} 
+	</if>
+	and bl.SUB_STATE in 
+		  <foreach collection="subStates" index="index" item="subStates" open="(" separator="," close=")">  
+            #{subStates}  
+        </foreach>
+        <if test="mbId!=null">
+        	and BL.mbId = #{mbId}
+        </if>
+        group by bwl.wlbh,tbml.fname_l2,tbml.FModel,TBM.fname_l2,bl.sqrq,bl.SUB_USER,bl.SUB_COSTCENTER,bl.SUB_STATE,bl.MBID,bwl.wlsq,bwl.shsl,bl.SUB_TIME,bl.djbh
+        order by costCenterSubTime,bwl.wlbh
+				
+				<!-- wl.CFWLNAME as wlmc,
+				tbml.FModel as wlgg,
+				tbm.fname_l2 as jldw,
+				bwl.wlsq as sqsl,
+				bl.sqrq,bwl.shsl
+		 from bh_list bl 
+		 full join bh_wl_list  bwl on bwl.djbh=bl.djbh and bl.sqrq=#{day} and bl.SUB_USER=#{user}
+		 full join CT_CUS_LHBHTEMPLATEENTRY wl on wl.CFWLID=bwl.wlbh 
+     	 left join t_bd_measureunit tbm on tbm.fid=bwl.WLBH
+     	 left join T_BD_Material tbml on tbml.fid=bwl.WLBH -->
+		
+	</select>
+	<update id="updateSqslByDjbh" parameterType="map" >
+		update bh_wl_list set wlsq=#{sqsl} <if test="shsl!=null">,shsl=#{shsl}</if>where djbh=#{djbh}
+	</update>
+	<update id="updateSubState" parameterType="map">
+		update bh_list set SUB_STATE=#{state}
+		<if test="subTime != null">
+		,SUB_TIME=#{subTime}
+		</if>
+		 where djbh=#{djbh}
+	</update>
+	
+	<update id="updateSubStateByCostCenterIdAndDay" parameterType="map">
+		update bh_list set SUB_STATE=#{newSubState}<if test="subTime!=null">,SUB_TIME=#{subTime}</if>
+		
+		 where SUB_COSTCENTER_ID=#{costCenterId} and sqrq=#{sqrq} and SUB_STATE=#{oldSubState}
+	</update>
+	
+	<select id="selectIfDayOfBh" parameterType="map" resultType="java.lang.Integer">
+	
+	
+		select count(*) from CT_CUS_LHBHRIPAIBANEMONTH
+		where FPARENTID in(
+		select FID 
+		from CT_CUS_LHBHRIPAIBAN where 
+		CFBHMBID=#{mbId}
+		<if test="jdId!=null">and CFBHORGID=#{jdId}</if>
+		<if test="customId!=null">and CFBHCUSTID=#{customId}</if>
+		)
+		and to_char(cfsenddate,'yyyy-MM-dd')=#{day}
+	
+	
+	
+	
+	
+	
+	
+		<!-- select CFDAYNUM FROM CT_CUS_LHBHRIPAIBANEMONTH where FPARENTID in(
+		select FID from CT_CUS_LHBHRIPAIBAN where 
+		to_char(CFMONTHBEGINDATE,'yyyy-MM')=#{yearAndMonth}
+		<if test="jdId!=null">and CFBHORGID=#{jdId}</if>
+		<if test="customId!=null">and CFBHCUSTID=#{customId}</if>
+		<if test="mbId!=null">and CFBHMBID=#{mbId}</if>
+		) -->
+	
+	
+	
+		<!-- select COUNT(*) from CT_CUS_LHBHRIPAIBANEMONTH CLH
+		INNER JOIN CT_CUS_LHBHRIPAIBAN CLN ON CLN.FID=CLH.FPARENTID 
+		WHERE CLN.fcontrolunitid=#{costCenterId} AND to_char(CLH.cfsenddate,'yyyy-mm-dd')=#{checkDate} -->
+	</select>
+	
+	<select id="selectBhByDayAndWlbm" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select bwl.wlbh as wlbm,bl.sqrq as sqrq,bwl.wlsq as sqsl,bwl.shsl as shsl,bl.djbh as djbh
+		from BH_LIST BL
+		INNER JOIN BH_WL_LIST BWL ON bwl.djbh=bl.djbh 
+		WHERE bl.sqrq=#{day} AND bwl.wlbh=#{wlbm} and bl.SUB_STATE=#{subState} and SUB_USER=#{user}
+	</select>
+	
+	<select id="selectCustInfoByNum"  parameterType="map" resultType="lanhai.entity.CustomerCom">
+		select fname_l2 as name,fnumber as userNum,fcustomerId as id from t_pm_user where fnumber=#{userNum}
+	</select>
+	
+	<select id="selectOrgIdByCostCenterId" parameterType="map" resultType="java.lang.String">
+		select FPARENTID from T_ORG_COSTCENTER where fid=#{costCenterId}
+	</select>
+	
+	<select id="selectFidByFnumber" parameterType="map" resultType="java.lang.String">
+		select FID from T_BD_MATERIAL where fnumber=#{number}
+	</select>
+	
+	<select id="selectOrgNameByNumber" parameterType="map" resultType="lanhai.entity.BhCostCenter">
+		select fname_l2 as centerName,fid as id from t_org_costcenter where fnumber=#{orgNumber}
+	</select>
+	
+	<select id="selectKczzByCostCenterId" parameterType="map" resultType="lanhai.entity.Company">
+		select fid as id,fname_l2 as companyName,fnumber as companyNumber from t_org_baseUnit where fid=
+(select ftounitid from T_ORG_UNITRELATION where FFromUnitID=#{costCenterId} and ftyperelationid=(select fid from T_ORG_TypeRelation where ffromtype='0' and ftotype='4' ))
+
+
+
+
+<!-- select tobt.fid as id,tobt.fname_l2 as companyName,tobt.fnumber as companyNumber, tba.fname_l2 as companyAreaName 
+		from t_org_baseUnit  tobt
+		left join T_ORG_UNITRELATION toun on toun.ftounitid=tobt.fid 
+		left join T_ORG_TypeRelation totn on totn.fid=toun.ftyperelationid 
+		left join T_ORG_OUPartAdmin toon on toon.fid=tobt.FPartAdminID
+		left join T_BD_Area tba on tba.fid=toon.FAreaID
+		where toun.FFromUnitID=#{costCenterId} and totn.ffromtype='0' and totn.ftotype='4' -->
+
+
+
+	</select>
+	
+	<select id="selectAreaByCostCenterId" parameterType="map" resultType="lanhai.entity.Company">
+		select tobt.fid as id,tobt.fname_l2 as companyName,tobt.fnumber as companyNumber, tba.FName as companyArea 
+		from t_org_baseUnit  tobt
+		left join T_ORG_UNITRELATION toun on toun.ftounitid=tobt.fid and toun.FFromUnitID=#{costCenterId}
+		left join T_ORG_TypeRelation totn on totn.fid=toun.ftyperelationid and ffromtype='0' and ftotype='4'
+		left join T_ORG_OUPartAdmin toon on toon.fid=tobt.FPartAdminID
+		left join T_BD_Area tba on tba.fid=toon.FAreaID
+		
+	</select>
+	
+	<select id="selectCwzzByOrgId" parameterType="map" resultType="lanhai.entity.Company">
+		select fid as id,fname_l2 as companyName,fnumber as companyNumber from t_org_baseUnit where fid=
+(select ftounitid from T_ORG_UNITRELATION where FFromUnitID=#{orgId} and ftyperelationid=(select fid from T_ORG_TypeRelation where ffromtype='0' and ftotype='1' ))
+	</select>
+	
+	
+	<select id="selectInputKeyByMb" parameterType="map" resultType="java.lang.String">
+		select BAOHUOINPUTKEY from CT_CUS_LHBHTEMPLATE where fid=#{mbId}
+	</select>
+	
+	<select id="selectNameByOrgId" parameterType="map" resultType="java.lang.String">
+		select fname_l2 from t_org_costcenter where fid=#{id}
+	</select>
+	
+	<update id="updateBhTimeByOrgType" parameterType="map">
+		update BH_TIME_CONTROL set start_time=#{startTime},end_time=#{endTime} where org_type=#{orgType}
+	</update>
+	
+	<select id="selectBhTime" parameterType="map" resultType="map">
+		select * from BH_TIME_CONTROL where ORG_TYPE=#{orgType}
+	</select>
+	
+	<update id="updateSubState3to1" parameterType="map">
+		update bh_list set SUB_STATE=#{newSubState}
+		 where sub_state=#{oldSubState} and org_id=#{jdId}
+	</update>
+	
+	<select id="selectBhedMb" parameterType="map" resultType="lanhai.entity.Mblx">
+			select bl.mbid as id,ccl.fnumber as mbmc from BH_LIST bl
+		 left join CT_CUS_LHBHTEMPLATE ccl on ccl.fid=bl.mbid
+		 where bl.SUB_COSTCENTER_ID=#{costCenterId} and sub_state=#{subState}
+		 group by bl.mbid,ccl.fnumber
+	</select>
+	
+	
+	<select id="selectHaveState3" parameterType="map" resultType="java.lang.Integer">
+		select count(*) from BH_LIST where sqrq=#{sqrq} and SUB_COSTCENTER_ID=#{costCenterId} and SUB_STATE=#{subState}
+	</select>
+	
+	
+	<delete id='deleteWhereSqsl0'>
+		delete from BH_WL_LIST where wlsq='0'
+	</delete>
+</mapper>

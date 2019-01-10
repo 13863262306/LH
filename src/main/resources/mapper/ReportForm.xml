@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="lanhai.dao.ReportFormDao">
+ <select id="selecthotelReportFormlist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+				select bwl.wlbh as "wlbm",
+		   tbml.fname_l2 as "wlmc",
+		   tbml.FModel as "wlgg",
+           TBM.fname_l2 as "jldw",
+           bl.SUB_USER as "subUser",
+           bl.SUB_COSTCENTER as "subCostCenter",
+		   bl.MBID as "mbId",
+           MB.FNUMBER as "mbName",
+		    sum(bwl.wlsq) as "sqsl",
+		   sum(NVL(bwl.shsl,bwl.wlsq)) as "shsl"
+	FROM bh_wl_list BWL
+		 left join bh_list BL on bwl.djbh=bl.djbh 
+         left join CT_CUS_LHBHTEMPLATE MB on MB.FID=BL.MBID
+		 left join T_BD_Material tbml on tbml.fnumber=bwl.wlbh
+		 left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 where bl.sub_user=#{userId} 
+  <if test="mbId != '0'.toString()">
+and bl.MBID=#{mbId}
+</if> 
+<if test="subState == '04'.toString()">
+and bl.SUB_STATE=#{subState}
+</if>   
+ <if test="startTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&gt;=to_number(replace(#{startTime},'-',''))
+</if> 
+<if test="endTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&lt;=to_number(replace(#{endTime},'-',''))
+</if>   
+GROUP BY bwl.wlbh ,
+		   tbml.fname_l2,
+		   tbml.FModel,
+           TBM.fname_l2,
+           bl.SUB_USER ,
+           bl.SUB_COSTCENTER ,
+		   bl.MBID ,
+           MB.FNUMBER
+         ORDER BY bl.MBID,bwl.wlbh
+ </select>
+ 
+ <select id="selectselectTssdlist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+     select DISTINCT sub_costcenter as "dk" from BH_HOTEL  where  jdbh=(select fname_l2 from t_org_baseUnit where fid=
+(select ftounitid from T_ORG_UNITRELATION where FFromUnitID=(         select 
+		   ORGCOST.FID 
+	FROM t_pm_user U
+        left join  T_BD_PERSON PER on u.fpersonid=PER.fid
+		left join T_ORG_PositionMember C on C.FPERSONID = PER.FID and c.FIsPrimary='1'
+		left join T_ORG_Position B on B.FID=C.FPOSITIONID
+		left JOIN T_ORG_COSTCENTER ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID WHERE U.fnumber=#{userId} and U.ftype='20')
+and ftyperelationid=(select fid from T_ORG_TypeRelation where ffromtype='0' and ftotype='4' ))
+union 
+select DISTINCT u.fname_l2
+	FROM t_pm_user U
+        left join  T_BD_PERSON PER on u.fpersonid=PER.fid
+		left join T_ORG_PositionMember C on C.FPERSONID = PER.FID and c.FIsPrimary='1'
+		left join T_ORG_Position B on B.FID=C.FPOSITIONID
+		left JOIN t_org_admin ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID
+	WHERE U.fnumber=#{userId} and U.ftype='30'
+)
+
+  <if test="mbId != '0'.toString()">
+and MBID=#{mbId}
+</if>  
+<if test="subState!=null">
+and SUB_STATE=#{subState}
+</if>
+ <if test="startTime!=''.toString()">
+and to_number(replace(sqrq,'-',''))&gt;=to_number(replace(#{startTime},'-',''))
+</if> 
+<if test="endTime!=''.toString()">
+and to_number(replace(sqrq,'-',''))&lt;=to_number(replace(#{endTime},'-',''))
+</if>   
+ </select>
+  <select id="selecthotelReportFormtlist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+				select* from (select BWL.WLBM as "wlbm",
+bl.sub_costcenter as "dk",
+		   tbml.fname_l2 as "wlmc",
+		   tbml.FModel as "wlgg",
+           TBM.fname_l2 as "jldw",
+		  -- bl.SUB_STATE as "subState",
+		   bl.MBID as "mbId",
+            MB.FNUMBER as "mbName",
+		  -- sum(bwl.SQSL) as "sqsl",
+		   sum(bwl.SHSL) as "shsl"
+	FROM BH_HOTEL_LIST BWL
+		 left join BH_HOTEL BL on bwl.ID=bl.ID
+         left join CT_CUS_LHBHTEMPLATE MB on MB.FID=BL.MBID
+		 left join T_BD_Material tbml on tbml.fnumber=BWL.WLBM
+		 left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 where bl.jdbh=(select fname_l2 from t_org_baseUnit where fid=
+(select ftounitid from T_ORG_UNITRELATION where FFromUnitID=(         select 
+		   ORGCOST.FID 
+	FROM t_pm_user U
+        left join  T_BD_PERSON PER on u.fpersonid=PER.fid
+		left join T_ORG_PositionMember C on C.FPERSONID = PER.FID and c.FIsPrimary='1'
+		left join T_ORG_Position B on B.FID=C.FPOSITIONID
+		left JOIN T_ORG_COSTCENTER ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID WHERE U.fnumber=#{userId} and U.ftype='20')
+and ftyperelationid=(select fid from T_ORG_TypeRelation where ffromtype='0' and ftotype='4' ))
+union 
+select DISTINCT u.fname_l2
+	FROM t_pm_user U
+        left join  T_BD_PERSON PER on u.fpersonid=PER.fid
+		left join T_ORG_PositionMember C on C.FPERSONID = PER.FID and c.FIsPrimary='1'
+		left join T_ORG_Position B on B.FID=C.FPOSITIONID
+		left JOIN t_org_admin ORGCOST ON ORGCOST.FID=B.FADMINORGUNITID
+	WHERE U.fnumber=#{userId} and U.ftype='30')
+	<if test="mbId != '0'.toString()">
+and bl.MBID=#{mbId}
+</if>  
+	<if test="subState!=null">and bl.SUB_STATE=#{subState}</if>
+  
+ <if test="startTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&gt;=to_number(replace(#{startTime},'-',''))
+</if> 
+<if test="endTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&lt;=to_number(replace(#{endTime},'-',''))
+</if>   
+group by MB.FNUMBER,bl.sub_costcenter,bl.MBID,bwl.WLBM,tbml.fname_l2,tbml.FModel,TBM.fname_l2)
+         pivot(sum("shsl") for "dk" in ${stalls}) ORDER BY  "mbId","wlbm"
+ </select>
+ 
+  <select id="selecjrrrlist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+  select DISTINCT jd_name as "jd" from BH_JT_RESULT
+  where MBID!='lsnullsss'
+    <if test="mbId != '0'.toString()">
+and MBID=#{mbId}
+</if>
+ <if test="startTime!=''.toString()">
+and to_number(replace(sqrq,'-',''))&gt;=to_number(replace(#{startTime},'-',''))
+</if> 
+<if test="endTime!=''.toString()">
+and to_number(replace(sqrq,'-',''))&lt;=to_number(replace(#{endTime},'-',''))
+</if>
+ </select>
+ 
+ <select id="selectgroupReportFormtlist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+ select * from (select --bl.jdId,
+			bl.JD_NAME as "jd",
+			  bl.MBID as "mbId",
+              MB.FNUMBER as "mbName",
+			  bwl.wlbm as "wlbm",
+		      tbml.fname_l2 as "wlmc",
+		      tbml.FModel as "wlgg",
+		      TBM.fname_l2 as "jldw",
+		    --  bl.sqrq as "sqrq",
+		     -- max(BL.CREATETIME) as "costCenterSubTime",
+		      sum(bwl.shsl) as "sqsl",
+		      --max(bwl.cgsl) as "cgsl",
+		   --   max(bwl.ckfhsl) as "ckfhsl",
+		     -- max(bwl.fbsl) as "fbsl",
+		      sum(epr.YIELD) as "zcsl",
+		     max( (select sum(FBaseQty) from T_IM_Inventory where FMaterialID=tbml.fid 
+		and FStorageOrgUnitID=ccle.CFFAHUOORGID and FWarehouseID=ccle.CFSENDSTOCKID)) as "kcsl"
+		     -- max(BWL.ID) as "tableEntryId",
+		     -- max(bl.ID) as "tableHeadId",
+		     -- bl.sub_state as "subState"
+		     -- ccle.CFFAHUOORGID as "fhzz",
+		      --ccle.CFCAIGOUORGID as "cgzz",
+		     -- bl.IS_CUSTOMER as "isCustomer"
+		      from BH_JT_RESULT_ENTRY BWL
+		      left join BH_JT_RESULT BL on bwl.parentId=bl.id
+              left join CT_CUS_LHBHTEMPLATE MB on MB.FID=BL.MBID
+		      left join ECOLOGICAL_PARK_PRODUCE epr on epr.WL_ID=bwl.wlbm and epr.SUB_DAY=BL.sqrq
+		      left join T_BD_Material tbml on tbml.fnumber=bwl.wlbm
+		 		left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 		left join CT_CUS_LHBHTEMPLATE ccle on ccle.fid=bl.mbid
+		 		-- left join T_IM_Inventory inv on inv.FMaterialID=tbml.fid and inv.FStorageOrgUnitID=ccle.CFFAHUOORGID
+		 		 where bl.MBID!='lsnullsss'
+  <if test="mbId != '0'.toString()">
+and bl.MBID=#{mbId}
+</if>  
+ <if test="startTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&gt;=to_number(replace(#{startTime},'-',''))
+</if> 
+<if test="endTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&lt;=to_number(replace(#{endTime},'-',''))
+</if>
+group by BL.JDID,bl.JD_NAME,bl.MBID,MB.FNUMBER,ccle.CFFAHUOORGID,
+bwl.wlbm,tbml.fname_l2,tbml.FModel,TBM.fname_l2,ccle.CFCAIGOUORGID,bl.IS_CUSTOMER)
+pivot (sum("sqsl") as "sq",sum("zcsl") "zc",sum("kcsl") "kc" FOR "jd" in ${stalls}) ORDER BY  "mbId","wlbm"
+ </select>
+ 
+ <select id="selectyieldReportFormtlist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+ SELECT EPP.ID as "djbh",
+				EPP.SUB_STATE as "subState",
+				EPP.WL_ID as "wlbm",
+				tbml.fname_l2 as "wlmc",
+		   tbml.FModel as "wlgg",
+           TBM.fname_l2 as "jldw",
+				EPP.YIELD as "sqsl",
+				EPP.SUB_DAY as "sqrq"
+		from ECOLOGICAL_PARK_PRODUCE  EPP 
+		left join T_BD_Material tbml on tbml.fnumber=epp.wl_id
+		 left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 where EPP.WL_ID!='nulsllsl'
+ <if test="mbId != '0'.toString()">
+and bl.MBID=#{mbId}
+</if>  
+ <if test="startTime!=''.toString()">
+and to_number(replace( EPP.SUB_DAY,'-',''))&gt;=to_number(replace(#{startTime},'-',''))
+</if> 
+<if test="endTime!=''.toString()">
+and to_number(replace( EPP.SUB_DAY,'-',''))&lt;=to_number(replace(#{endTime},'-',''))
+</if>
+
+         order by EPP.SUB_DAY ,EPP.ID
+ </select>
+ 
+ <select id="selectdeliveryReportFormtlist" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+ select * from (select --bl.jdId,
+			bl.JD_NAME as "jd",
+			  bl.MBID as "mbId",
+              MB.FNUMBER as "mbName",
+			  bwl.wlbm as "wlbm",
+		      tbml.fname_l2 as "wlmc",
+		      tbml.FModel as "wlgg",
+		      TBM.fname_l2 as "jldw",
+		    --  bl.sqrq as "sqrq",
+		     -- max(BL.CREATETIME) as "costCenterSubTime",
+		      sum(bwl.shsl) as "sqsl",
+		      --max(bwl.cgsl) as "cgsl",
+		   --   max(bwl.ckfhsl) as "ckfhsl",
+		     -- max(bwl.fbsl) as "fbsl",
+		     -- sum(epr.YIELD) as "zcsl",
+		   --   max(inv.FBaseQty) as "kcsl"
+		       max(bwl.ckfhsl)  as "zcsl",
+		      sum(bwl.shsl)-NVL(max(bwl.ckfhsl),0) as "kcsl"
+		     -- max(BWL.ID) as "tableEntryId",
+		     -- max(bl.ID) as "tableHeadId",
+		     -- bl.sub_state as "subState"
+		     -- ccle.CFFAHUOORGID as "fhzz",
+		      --ccle.CFCAIGOUORGID as "cgzz",
+		     -- bl.IS_CUSTOMER as "isCustomer"
+		      from BH_JT_RESULT_ENTRY BWL
+		      left join BH_JT_RESULT BL on bwl.parentId=bl.id
+              left join CT_CUS_LHBHTEMPLATE MB on MB.FID=BL.MBID
+		      left join ECOLOGICAL_PARK_PRODUCE epr on epr.WL_ID=bwl.wlbm and epr.SUB_DAY=BL.sqrq
+		      left join T_BD_Material tbml on tbml.fnumber=bwl.wlbm
+		 		left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 		left join CT_CUS_LHBHTEMPLATE ccle on ccle.fid=bl.mbid
+		 	--	left join T_IM_Inventory inv on inv.FMaterialID=tbml.fid and inv.FStorageOrgUnitID=ccle.CFFAHUOORGID
+		 		 where bl.MBID!='lsnullsss'
+  <if test="mbId != '0'.toString()">
+and bl.MBID=#{mbId}
+</if>  
+ <if test="startTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&gt;=to_number(replace(#{startTime},'-',''))
+</if> 
+<if test="endTime!=''.toString()">
+and to_number(replace(bl.sqrq,'-',''))&lt;=to_number(replace(#{endTime},'-',''))
+</if>
+group by BL.JDID,bl.JD_NAME,bl.MBID,MB.FNUMBER,ccle.CFFAHUOORGID,
+bwl.wlbm,tbml.fname_l2,tbml.FModel,TBM.fname_l2,ccle.CFCAIGOUORGID,bl.IS_CUSTOMER)
+pivot (sum("sqsl") as "sq",sum("zcsl") "fh",sum("kcsl") "wf" FOR "jd" in ${stalls}) ORDER BY  "mbId","wlbm"
+ </select>
+</mapper>

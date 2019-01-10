@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<div th:include="header::headLink"></div>
+		<title>报货记录</title>
+		<style>
+    	input{
+    		width:7em;
+    		text-align:center;
+    	}
+    </style>
+	</head>
+<body style="background-color:#eee">
+            <div class="row wrapper border-bottom white-bg page-heading" style="padding-top: 15px">
+                <div class="col-lg-12">
+                    <span style="font-size: 22px; margin-top: 10px; margin-left: 10px"><strong th:text="${day+'  '+'预报货记录'}">报货系统</strong></span>
+					<span th:if="user.companyName!=null" style="position: absolute; right: 570px; top: 20px; font-size: 16px"th:text="'组织：'+${user.companyName}"></span>
+			<span style="position: absolute; right: 260px; top: 20px; font-size: 16px"th:text="'部门：'+${user.costCenterName}"></span>
+			<span style="position: absolute; right: 100px; top: 20px; font-size: 16px" th:text="'用户：'+${user.name}" id="userNameSpan" th:uname="${user.name}"></span> 
+					<!-- <a style="position: absolute; right: 70px; top: 20px; font-size: 16px" th:text="消息"></a> -->
+                </div>  </div>
+              <div class="animated" style="height:100%;background-color:#eee">
+            <div class="row">
+                <div class="col-lg-12">                   
+                    <div class="ibox ">                             
+                        <div class="ibox-content">
+                               <div class="col-sm-12"> 
+                        <div class="input-group">
+                        <div class="float-left tooltip-demo" style="margin-left:2%">
+                        	<span style="font-size:16px" th:text="${'申请日期：'+day}" id="timeSpan" th:day="${day}">申请日期：</span>
+                        </div>
+                        
+                        <div class="float-left col-sm-3">
+							<select data-placeholder="暂无模板" id="wlMbSelect"
+								 class="chosen-select mbSelect"
+								tabindex="2">
+								<option th:each="mbList : ${mbList}"th:if="${mbList.id==mbId}" selected th:value="${mbList.id}"th:text="${mbList.mbmc}"></option>
+								<option th:each="mbList : ${mbList}"th:if="${mbList.id!=mbId}" th:value="${mbList.id}"th:text="${mbList.mbmc}"></option>
+							</select>
+						</div>
+                        
+                        <!-- <input class="timeInput" size="16" type="text" th:value="${day}"  style="width:13em"> -->
+                        <!-- <div class="float-left tooltip-demo col-sm-3" style="margin-left:10px">
+                        <span style="font-size:16px">单据编号：</span>
+                            <input class="djbhInput" type="text" value="" placeholder="请输入单据编号" style="border-color:#ddd">
+                           </div> -->
+                        <!-- <div class="float-left col-sm-3">
+                            <select  data-placeholder="请选择物料模板" id="wlMbSelect" style="width:350px;" class="chosen-select mbSelect"  tabindex="2">
+                                <option th:each="mbList : ${mbList}" th:if="${mbList.id==mbId}" selected th:value="${mbList.id}" th:text="${mbList.mbmc}">部门奖金包上传</option>
+                                <option th:each="mbList : ${mbList}" th:if="${mbList.id!=mbId}" th:value="${mbList.id}" th:text="${mbList.mbmc}">部门奖金包上传</option>
+                            </select> 
+                           <!-- </div> <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="turnDay" onclick="toChangeDay()">查看</button></div> -->
+                                      <div class="tooltip-demo" style="position:absolute;right:47em"><button type="button" class="btn btn-w-m btn-info"  id="trialButton" onclick="toSaveBo()">修改申请数量</button></div>
+                                      <div class="tooltip-demo" style="position:absolute;right:36em"><button type="button" class="btn btn-w-m btn-info"  id="toBh" onclick="goOnSub()">提交</button></div>
+                                      <div class="tooltip-demo" style="position:absolute;right:25em"><button type="button" class="btn btn-w-m btn-info"  id="seeHistoryOrder" onclick="toSeeHistoryOfSub()">查看提交</button></div>
+                                      <div class="tooltip-demo" style="position:absolute;right:14em"><button type="button" class="btn btn-w-m btn-info"  id="toBh" onclick="goOnBh()">返回报货首页</button></div>
+                                      <div class="tooltip-demo" style="position:absolute;right:3em"><button type="button" class="btn btn-w-m btn-info"  id="toSeeBaoBiao" onclick="toSeeBaoBiao()">报表查询</button></div>
+                                      </div>
+                                      <!-- <div class="float-left tooltip-demo" style="margin-left:2%"><button type="button" class="btn btn-w-m btn-info"  id="seeHistoryOrder" onclick="toSeeHistory()">查看历史订单</button></div> --> 
+                                   
+                            </div>
+                            <table class="footable table table-stripped " data-limit-navigation="5" data-page-size="15" data-filter=#filter style="margin-top:1em">
+                                <thead>
+                                    <th  width="12%"  style="text-align:center">物料编码</th>
+                                    <th  width="12%"  style="text-align:center">物料名称</th>
+                                    <th  width="12%" style="text-align:center" >物料规格</th>
+                                    <th  width="12%" style="text-align:center" >计量单位</th>
+                                    <th  width="12%" style="text-align:center">申请数量</th>
+                                    <th  width="12%" style="text-align:center">审核数量</th>
+                                    <th  width="12%" style="text-align:center">提交状态</th>
+                                    <th width="12%" style="text-align:center">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="eatter">
+                                 
+                                <tr class="gradeX" th:if="${listSize eq 0}">
+                                   <td colspan="12">暂无数据</td>
+                                </tr> 
+                           <!--      <tr class="gradeX" th:each="plantypeList : ${plantypeList}"> -->
+                                 <tr  class="gradeX tabletrVal" th:each="wlList: ${wlList}" >
+                                    <td class="wlbmTd" th:djbh="${wlList.djbh}" th:text="${wlList.wlbm}"style="text-align:center" >张三</td>
+                                    <td class="wlmcTd" th:text="${wlList.wlmc}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.wlgg==null?'':wlList.wlgg}"style="text-align:center">张三</td>
+                                    <td th:text="${wlList.jldw==null?'':wlList.jldw}"style="text-align:center">张三</td>
+                                    <td style="text-align:center">
+							 			<input  class="sqslInput" th:value="${wlList.sqsl==null?'':wlList.sqsl}" type="number" min="0"style="text-align:center" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+							 		</td>
+                                    <td th:text="${wlList.shsl==null?wlList.sqsl:wlList.shsl}" style="text-align:center">张三</td>
+                                    <td th:if="${wlList.subState eq '1'}" style="text-align:center"><button class="btn btn-success" th:state="${wlList.subState}">已提交</button></td>
+                                    <td th:if="not ${wlList.subState eq '1'}" style="text-align:center"><button class="btn btn-error" th:state="${wlList.subState}">未提交</button></td>
+                                    <td style="text-align:center"><button type="button" th:attr="djbh=${wlList.djbh}" class="btn btn-w-m btn-danger delButton" onclick="toDelBo(this)">删除</button></td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td  colspan="14">
+                                        <ul class="pagination float-right"></ul>
+                                    </td>
+                                </tr>
+                                
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>              
+<!--            <div id="eatter">
+           </div>  -->
+            
+        </body>
+	<div th:include="footerLinkJs::footLink"></div>
+    <script>
+            $(document).ready(function() {
+                $('.footable').footable();
+            	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true});
+          		  /* $("#wlMbSelect").change(function(){
+          			window.location.href="/bh/showBh?mbId="+$("#wlMbSelect").children('option:selected').val();
+                    }); */
+          		var today = getBeforeDate(0);
+          		console.log(today);
+          		$('.timeInput').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			startDay:today,
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		});
+          		
+          		/* $('.timeInput').val(today); */
+          		
+				$("#wlMbSelect").change(function(){
+					var day = $('#timeSpan').attr("day");
+          			var mbId = $("#wlMbSelect").children('option:selected').val();
+          			mbId = encodeURI(mbId).replace(/\+/g,'%2B');
+          			window.location.href="/bh/toSeeHistoryOfSave?day="+day+"&mbId="+mbId;
+                    });
+          	
+          		
+          		
+				//申请数量修改事件
+          		$(".sqslInput").each(function(){
+          			
+          			$(this).on("input",function(){
+          				if($(this).val()<=0){
+          					$(this).val($(this).attr("oldValue"));
+          					toastr.error("申请数量不能为0，如不需要此物料请点击删除");
+          				}
+          				var zcsl = ($(this).parent().next().text())*1;
+          				/* if(($(this).val())*1 >zcsl){
+          					toastr.error("不能大于自产数量");
+          					$(this).val($(this).attr("oldValue"));
+          					return;
+          				} */
+          				calCgsl($(this).parent().parent());
+          			})
+          		})
+          		$("input").each(function(){
+          			$(this).on("click",function(){
+          				$(this).attr("oldValue",$(this).val());
+          			})
+          		})
+          		
+            })	
+            function getBeforeDate(n){//n为你要传入的参数，当前为0，前一天为-1，后一天为1
+                  var date = new Date() ;
+                  var year,month,day ;
+                  date.setDate(date.getDate()+n);
+                  year = date.getFullYear();
+                  month = date.getMonth()+1;
+                  day = date.getDate() ;
+                  s = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) ;
+                  return s ;
+                }
+          function goOnBh(){
+        	  window.location.href="/bh/showBh";
+          }
+          
+          function toSeeBaoBiao(){
+        	  var userName = $("#userNameSpan").attr("uName");
+        	  window.location.href="/reportForm/stallsReportForm?username="+userName;
+          }
+            
+          function toChangeDay(){
+        	  var day = $('.timeInput').val();
+        	  if(isEmpty(day)){
+             	 toastr.error("申请时间不能为空");
+             	 return;
+              }
+        	  window.location.href="/bh/toSeeHistoryOfSave?day="+day;
+          }
+          
+          //删除：
+          function toDelBo(ele){
+        	  //var djbh = e.parent().parent();
+        	  var thisButton = $(ele);
+        	  var djbh = thisButton.attr("djbh");
+        	  console.log(djbh);
+        	  $.ajax({
+                  type: 'post',
+                  url: "/jdhz/delOneRow",
+                  data: {djbh:djbh},
+                  success: function (data) {
+               	   if(data=="删除成功"){
+           			   toastr.success(data);
+           			   thisButton.parent().parent().remove();
+           		   }else{
+           			   toastr.error(data);
+           		   }
+                  }
+              });
+          }
+          
+          
+      function goOnSub(){
+    	  
+    	  
+    	  /* Ewin.confirm({ message: "确认要全部提交吗？" }).on(function (e) {
+    		  if (!e) {
+    			return;
+    	  } */
+    	  
+    	   qikoo.dialog.confirm('确认全部提交吗？',function(){
+			
+    		   var returnInfo = toSaveBoAction();
+    		   if(returnInfo=="修改成功"){
+    			   $.ajax({
+      	             type: 'post',
+      	             url: "/bh/toSubmitBh",
+      	             data: {day:day},
+      	             success: function (data) {
+      	          	   if(data=="提交成功"){
+      	      			   toastr.success(data);
+      	      			   window.location.reload();
+      	      			 //window.location.href="/bh/toSeeHistoryOfSave?day="+day;
+      	      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      	      		   }else{
+      	      			   toastr.error(data);
+      	      		   }
+      	             }
+      	         });
+     		   }else{
+     			   toastr.error(returnInfo);
+     		   }
+    		  
+    	     	 
+    	   
+    	   
+    	   },function(){
+		});	       	  
+    	  
+    	  var day = $("#timeSpan").attr("day");
+    	  /* var trList = $(".tabletrVal");
+    	  if(0 == trList.length){
+       		toastr.error("没有数据需要提交");
+       		return;
+       	 } */
+    	 
+    	  /* var value="[";
+     	 for (var i=0;i<trList.length;i++) {
+     		 var djbh = trList.eq(i).find(".delButton").attr("djbh");
+     		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+     	 if(i==0){
+ 			   value+="{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+ 		   }else{
+ 			   value+=",{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+ 		   }
+     	 }
+     	 value+="]"; */
+    	  
+    	  
+     	//提交
+    	
+    	  /* }) */
+    	  
+      }
+      
+      function toSaveBo(){
+    	  var returnInfo = toSaveBoAction();
+    	  if(returnInfo=="修改成功"){
+ 			   toastr.success(returnInfo);
+ 			 window.location.reload();
+ 		   }else{
+ 			   toastr.error(returnInfo);
+ 		   }
+      }
+      
+      
+      
+      
+            //修改申请数量具体方法
+      function toSaveBoAction(){
+            	var returnInfo;
+    	 var day = $('#timeSpan').attr("day");
+    	 var trList = $(".tabletrVal");
+    	 if(0 == trList.length){
+     		toastr.error("没有数据需要保存");
+     		return;
+     	 }
+    	 var value="[";
+    	 for (var i=0;i<trList.length;i++) {
+    		 var djbh = trList.eq(i).find(".delButton").attr("djbh");
+    		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+    	 if(i==0){
+			   value+="{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }else{
+			   value+=",{\"djbh\":\""+djbh+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }
+    	 }
+    	 value+="]";
+    	 $.ajax({
+             type: 'post',
+             async:false,
+             url: "/bh/toSaveBhOfHistory",
+             data: { val:value,day:day},
+             success: function (data) {
+          	  /*  if(data=="修改成功"){
+      			   toastr.success(data);
+      			 window.location.reload();
+      		   }else{
+      			   toastr.error(data);
+      		   } */
+            	 returnInfo=data;
+             }
+         });
+    	 return returnInfo;
+     } 
+       //查看提交    
+      function toSeeHistoryOfSub(){
+    	  var day = $('#timeSpan').attr("day");
+     	 window.location.href="/bh/toSeeHistoryOfSub?day="+day;
+      }        
+   //判断是否为空
+     function isEmpty(obj){
+  	    if(typeof obj == "undefined" || obj == null || obj == ""){
+  	        return true;
+  	    }else{
+  	        return false;
+  	    }
+  	}
+   
+            </script>
+</html>

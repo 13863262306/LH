@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="true">
+    <meta name="MobileOptimized" content="320">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <title>生态园生产量报表</title>
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+     <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/default/easyui.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/easyui/themes/icon.css}">
+    <link rel="stylesheet" th:href="@{/css/easyui/base.css}"/>
+    <link rel="stylesheet" th:href="@{/css/easyui/style.css}"/>
+    <link th:href="@{/css/bootstrap-datetimepicker.min.css}" rel="stylesheet">
+        <link th:href="@{/css/plugins/chosen/bootstrap-chosen.css}" rel="stylesheet">
+     <script th:src="@{/js/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/easyui/jquery.easyui.min.js}"></script>
+    <script th:src="@{/easyui/easyui-lang-zh_CN.js}"></script>
+    <script th:src="@{/easyui/jgxLoader.js}"></script>
+        <!-- Chosen -->
+    <script th:src="@{/js/plugins/chosen/chosen.jquery.js}"></script>
+    
+    <script th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.zh-CN.js}"></script>
+
+	</head>
+<body class="full-page">
+            <div class="row wrapper border-bottom white-bg page-heading" style="margin-right: 0px;margin-left: 0px;">
+                <div class="col-lg-12">
+                    <h2><span >生态园生产量报表</span></h2>
+                </div>  </div>
+ <div class="animated" style="height:100%;background-color:#eee">
+            <div class="row" style="margin-right: 0px;margin-left: 0px;">
+                <div class="col-lg-12">                   
+                    <div class="ibox ">                             
+                        <div class="ibox-content">
+     <div class="queryBox">
+    <!-- 列表-->
+    <div class="queryList">
+    <div id="tb" style="padding:3px">
+    <div class="input-group">
+     <div style="display:none;" class="float-left col-sm-2">
+		<select data-placeholder="暂无模板" id="wlMbSelect"
+										style="line-height:26px;border:1px solid #ccc" class="chosen-select mbSelect"
+										tabindex="2">
+										<option th:if="${mbId==0}" selected th:value="0" >全部</option>
+										<option th:if="${mbId!=0}" th:value="0" >全部</option>
+										<option th:each="mbList : ${mbList}"th:if="${mbList.id==mbId}" selected th:value="${mbList.id}"th:text="${mbList.mbmc}"></option>
+										<option th:each="mbList : ${mbList}"th:if="${mbList.id!=mbId}" th:value="${mbList.id}"th:text="${mbList.mbmc}"></option>
+									</select>
+									</div>
+  <div> <input id="startTime" size="16" type="text" th:value="${startTime}" placeholder="开始时间" class="datetimepickerddddd" ></div>
+  <span>-&gt;</span>
+  <div > <input id="endTime" size="16" type="text" th:value="${endTime}" placeholder="结束时间" class="datetimepickerddddd" ></div>
+	<div class="float-left tooltip-demo" style="position:absolute;right:15em"><button type="button" class="btn btn-w-m btn-info" onclick="doSearch()">查询</button></div>
+	<div class="float-left tooltip-demo" style="position:absolute;right:9em"><button type="button" class="btn btn-w-m btn-info" onclick="hbexport()">导出</button></div>
+	<div class="float-left tooltip-demo" style="position:absolute;right:3em"><button type="button" class="btn btn-w-m btn-info" onclick="javascript :history.back(-1);">返回</button></div>
+</div></div>
+        <table id="mytable">
+              <thead class="listTit tabTh">
+                     <tr> <!-- <th   data-options="frozen:true,field:'mbName'"  style="text-align:center;display:none;">报货模板</th> -->
+                                    <th width="19%" data-options="frozen:true,field:'wlbm'"   style="text-align:center">物料编码</th>
+                                    <th width="19%"  data-options="frozen:true,field:'wlmc'"  style="text-align:center">物料名称</th>
+                                    <th width="19%"  data-options="frozen:true,field:'wlgg'"  style="text-align:center" >物料规格</th>
+                                    <th width="19%"  data-options="frozen:true,field:'jldw'"  style="text-align:center" >计量单位</th>
+                                    <th width="19%"  data-options="frozen:true,field:'sqsl'"  style="text-align:center">数量</th>
+
+                                </tr>
+                                </thead>
+        </table>
+    </div>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>              
+            
+        </body>
+    <script  type="text/javascript"  th:inline="none">
+            $(document).ready(function() {
+            	
+            	$('#mytable').datagrid({
+            		singleSelect: true,
+                    collapsible: true,
+                    fitColumns: true,
+                    cellspacing:0,
+                    pagination:true,
+                    pageSize: 20, 
+                    cellpadding:0,
+                    width:'100%',
+                    height:520,
+                    url: '/reportForm/yieldReportFormData',
+                    queryParams: {  		
+                    	startTime:$("#startTime").val(),
+                    	endTime:$("#endTime").val(),
+                    	mbId:$("#wlMbSelect").val()
+        			  },
+                    method: 'Post',
+                    onLoadSuccess: function(data){
+                        $(this).datagrid('freezeRow');
+                      var mergeCells=data.mergeCells;
+                  	for(var i=0; i<mergeCells.length; i++){
+                        $(this).datagrid('mergeCells',{
+        					index: mergeCells[i].index,
+        					field: 'mbName',
+        					rowspan: mergeCells[i].rowspan
+        				});}
+                    }
+            	});
+              	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true}); 
+
+          		$('#startTime').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			/* startDay:$('#startTime').val(), */
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		});
+          		$('#endTime').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			/* startDay:$('#startTime').val(), */
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		});
+            });	 
+            function doSearch(){
+             	$('#mytable').datagrid('load',{
+                	startTime:$("#startTime").val(),
+                	endTime:$("#endTime").val(),
+                	mbId:$("#wlMbSelect").val()
+            	}); 
+            }
+            function printing(){
+            	//var oldstr = document.body.innerHTML;
+     /*        	window.document.body.innerHTML=$("table").html();  */
+                window.print();
+               // window.document.body.innerHTML=oldstr;
+            }
+            function hbexport(){
+            	var url="/reportForm/yielddownload?mbId="+$("#wlMbSelect").val()+"&startTime="+
+    			$("#startTime").val()+"&endTime="+$("#endTime").val();
+            	var elemIF = document.createElement("iframe");   
+                elemIF.src = url;   
+                elemIF.style.display = "none";   
+                document.body.appendChild(elemIF); 
+            }
+            </script>
+</html>

@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="lanhai.dao.JdhzDao">
+	
+	<!-- 酒店汇总首页数据列表 2018-12-28改为获取属于该酒店下的档口已提交酒店未处理的数据 -->
+	<select id="selectJdhzList" parameterType="map" resultType="lanhai.entity.Jdhz">
+	select bwl.wlbh as wlbm,
+		   tbml.fname_l2 as wlmc,
+		   tbml.FModel as wlgg,
+           TBM.fname_l2 as jldw,
+		   bl.sqrq as sqrq,
+           bl.SUB_USER as subUser,
+           bl.SUB_COSTCENTER as subCostCenter,
+		   bl.SUB_STATE as subState,
+		   bl.MBID as mbId,
+		   bwl.wlsq as sqsl,
+		   bwl.shsl as shsl,
+		   bl.SUB_TIME as costCenterSubTime,
+		   bl.djbh as dkBhDjbh,
+		   bl.org_id as jdId,
+		   ccle.CFISZICAI as isZiCai
+	FROM bh_wl_list BWL
+		 join bh_list BL on bwl.djbh=bl.djbh 
+		 join T_BD_Material tbml on tbml.fnumber=bwl.wlbh
+		 join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 left join CT_CUS_LHBHTEMPLATE ccle on ccle.fid=bl.mbid
+	where  bl.SUB_STATE in 
+		  <foreach collection="subStates" index="index" item="subStates" open="(" separator="," close=")">  
+            #{subStates}  
+        </foreach>
+        <if test="costCenterNames != null">
+			  and bl.SUB_COSTCENTER in 
+			  <foreach collection="costCenterNames" index="index" item="costCenterNames" open="(" separator="," close=")">  
+	            #{costCenterNames}  
+	        </foreach>
+        </if>
+        <if test="wlbms!=null">
+        	and bwl.wlbh in<foreach collection="wlbms" index="index" item="wlbms" open="(" separator="," close=")">
+        						#{wlbms}  
+        					</foreach>
+        </if>
+        <if test="mbs!=null">
+        	 and bl.MBID in 
+			  <foreach collection="mbs" index="index" item="mbs" open="(" separator="," close=")">  
+	            #{mbs}  
+	        </foreach>
+        </if>
+         <if test="jdIds!=null">
+        	 and bl.ORG_ID in 
+			  <foreach collection="jdIds" index="index" item="jdIds" open="(" separator="," close=")">  
+	            #{jdIds}  
+	        </foreach>
+        </if>
+	group by bl.org_id,bl.SUB_USER,bl.SUB_COSTCENTER,bl.SUB_STATE,bl.MBID,ccle.CFISZICAI,bl.SUB_TIME,bwl.wlbh,tbml.fname_l2,tbml.FModel,
+	TBM.fname_l2,bl.sqrq,bwl.wlsq,bwl.shsl,bl.SUB_TIME,bl.djbh
+	order by bl.SUB_COSTCENTER,BL.SUB_TIME
+	
+	</select>
+	
+	
+	
+	
+	
+	
+	<!-- 酒店汇总首页数据列表 -->
+	<!-- <select id="selectJdhzList" parameterType="map" resultType="lanhai.entity.Jdhz">
+	select bwl.wlbh as wlbm,
+		   tbml.fname_l2 as wlmc,
+		   tbml.FModel as wlgg,
+           TBM.fname_l2 as jldw,
+		   bl.sqrq as sqrq,
+           bl.SUB_USER as subUser,
+           bl.SUB_COSTCENTER as subCostCenter,
+		   bl.SUB_STATE as subState,
+		   bl.MBID as mbId,
+		   bwl.wlsq as sqsl,
+		   bwl.shsl as shsl,
+		   bl.SUB_TIME as costCenterSubTime,
+		   bl.djbh as dkBhDjbh,
+		   bl.org_id as jdId
+	FROM bh_wl_list BWL
+		 left join bh_list BL on bwl.djbh=bl.djbh 
+		 left join T_BD_Material tbml on tbml.fnumber=bwl.wlbh
+		 left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+	where bl.sqrq=#{selectDay} and bl.SUB_STATE in 
+		  <foreach collection="subStates" index="index" item="subStates" open="(" separator="," close=")">  
+            #{subStates}  
+        </foreach>
+        <if test="costCenterNames != null">
+			  and bl.SUB_COSTCENTER in 
+			  <foreach collection="costCenterNames" index="index" item="costCenterNames" open="(" separator="," close=")">  
+	            #{costCenterNames}  
+	        </foreach>
+        </if>
+        <if test="wlbms!=null">
+        	and bwl.wlbh in<foreach collection="wlbms" index="index" item="wlbms" open="(" separator="," close=")">
+        						#{wlbms}  
+        					</foreach>
+        </if>
+        <if test="mbs!=null">
+        	 and bl.MBID in 
+			  <foreach collection="mbs" index="index" item="mbs" open="(" separator="," close=")">  
+	            #{mbs}  
+	        </foreach>
+        </if>
+         <if test="jdIds!=null">
+        	 and bl.ORG_ID in 
+			  <foreach collection="jdIds" index="index" item="jdIds" open="(" separator="," close=")">  
+	            #{jdIds}  
+	        </foreach>
+        </if>
+	group by bl.org_id,bl.SUB_USER,bl.SUB_COSTCENTER,bl.SUB_STATE,bl.MBID,bl.SUB_TIME,bwl.wlbh,tbml.fname_l2,tbml.FModel,
+	TBM.fname_l2,bl.sqrq,bwl.wlsq,bwl.shsl,bl.SUB_TIME,bl.djbh
+	order by bl.SUB_COSTCENTER,BL.SUB_TIME
+	
+	</select> -->
+	
+	<select id="selectJdbhList" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select BWL.WLBM as wlbm,
+		bl.jdId as jdId,
+		   tbml.fname_l2 as wlmc,
+		   tbml.FModel as wlgg,
+           TBM.fname_l2 as jldw,
+		   bl.SUB_STATE as subState,
+		   bl.MBID as mbId,
+		   sum(bwl.SQSL) as sqsl,
+		   sum(bwl.SHSL) as shsl,
+		   ccle.CFISZICAI as isZiCai
+	FROM BH_HOTEL_LIST BWL
+		 left join BH_HOTEL BL on bwl.ID=bl.ID 
+		 left join T_BD_Material tbml on tbml.fnumber=BWL.WLBM
+		 left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 left join CT_CUS_LHBHTEMPLATE ccle on ccle.fid=bl.mbid
+	where 
+		  bl.sqrq=#{selectDay} and bl.jdId=#{jdId}
+		  
+		  
+        <if test="costCenterNames!=null">
+        	and bl.SUB_COSTCENTER in 
+		  <foreach collection="costCenterNames" index="index" item="costCenterNames" open="(" separator="," close=")">  
+            #{costCenterNames}  
+        </foreach>
+        </if>
+		  
+        <if test="wlbms!=null">
+        	and bwl.wlbm in<foreach collection="wlbms" index="index" item="wlbms" open="(" separator="," close=")">
+        						#{wlbms}  
+        					</foreach>
+        </if>
+        <if test="mbId!=null">
+        	and bl.mbId=#{mbId}
+        </if>
+        <if test="subState!=null">
+        	and bl.sub_state=#{subState}
+        </if>
+	group by bl.jdId,ccle.CFISZICAI,bl.MBID,bwl.WLBM,tbml.fname_l2,tbml.FModel,TBM.fname_l2,SUB_STATE
+	order by bl.SUB_STATE,bl.MBID,bwl.WLBM
+		
+		
+		
+		
+		<!-- select bwl.wlbm as wlbm,
+			bwl.id as id,
+		      wl.CFWLNAME as wlmc,
+		      wl.CFWLGUIGE as wlgg,
+		      TBM.fname_l2 as jldw,
+		      bl.sqrq as sqrq,
+		      bl.SUB_STATE as subState,
+		      BWL.sqsl as sqsl,
+		      BWL.shsl as shsl,
+		      BWL.djbh as djbh,
+		      BWL.SAVE_TIME as saveTime
+		      from BH_HOTEL_LIST BWL,BH_HOTEL BL,CT_CUS_LHBHTEMPLATEENTRY WL,t_bd_measureunit TBM
+		where bwl.djbh=bl.djbh and BWL.SAVE_TIME=BL.SAVE_TIME and wl.CFWLUNITEID=tbm.fid
+		<if test="selectDay!=null">and bl.sqrq=#{selectDay}</if>
+		and wl.CFWLID=bwl.wlbm 
+		<if test="jdId!=null">and BL.jdbh=#{jdId}</if>
+		group by bwl.wlbm,wl.CFWLNAME,wl.CFWLGUIGE,TBM.fname_l2,bl.SUB_STATE,bl.sqrq,bwl.sqsl,bwl.shsl,BWL.djbh,BWL.SAVE_TIME,bwl.id
+		order by bwl.wlbm -->
+	</select>
+	
+	<!-- 根据物料ID和日期查询某物料的suoyoudanjuxinxi -->
+	<select id="selectDjByWlidAndDay" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select bwl.wlbh as wlbm,
+			bl.SUB_COSTCENTER as subCostCenter,
+			bwl.id as bwlId,
+	        wl.CFWLNAME as wlmc, 
+	        bl.djbh as djbh,
+	        wl.CFWLGUIGE as wlgg, 
+	        TBM.fname_l2 as jldw,
+	        bl.sqrq as sqrq, 
+	        bwl.wlsq as sqsl,
+	        bwl.shsl as shsl
+	  from bh_wl_list BWL,bh_list BL,CT_CUS_LHBHTEMPLATEENTRY WL,t_bd_measureunit TBM
+	  where bwl.djbh=bl.djbh and wl.CFWLID=bwl.wlbh and bwl.wlbh=#{wlbm} and bl.sqrq=#{day} and BL.SUB_STATE='1' and wl.CFWLUNITEID=tbm.fid
+	  and SUB_COSTCENTER in
+	  <foreach collection="costCenters" index="index" item="costCenters" open="(" separator="," close=")">  
+            #{costCenters}  
+        </foreach>
+	  order by bl.SUB_USER
+	</select>
+	
+	<delete id="deleteBhListByDjbh" parameterType="java.lang.String">
+		delete from BH_LIST where DJBH=#{djbh} 
+	</delete>
+	<delete id="deleteBhWlListByDjbh" parameterType="java.lang.String">
+		delete from BH_WL_LIST where DJBH=#{djbh} 
+	</delete>
+	
+	
+	
+	
+	
+	
+	<delete id="deleteJdBhListByDjbh">
+		delete from BH_HOTEL where ID=#{id}
+	</delete>
+	<delete id="deleteJdBhWlListByDjbh">
+		delete from BH_HOTEL_LIST where ID=#{id}
+	</delete>
+	
+	
+	<delete id="deleteJdBhListById" parameterType="map">
+		delete from BH_HOTEL where id in 
+		<foreach collection="id" index="index" item="id" open="(" separator="," close=")">  
+            #{id}  
+        </foreach>
+	</delete>
+	<delete id="deleteJdBhWlListById" parameterType="map">
+		delete from BH_HOTEL_LIST where id in 
+		<foreach collection="id" index="index" item="id" open="(" separator="," close=")">  
+            #{id}  
+        </foreach>
+	</delete>
+	
+	
+	
+	<insert id="saveBhHotelList" parameterType="map">
+		insert into  BH_HOTEL_LIST (ID,DJBH,WLBM,SQSL<if test="shsl!=null">,SHSL</if>,SAVE_TIME) values(#{id},#{djbh},#{wlbm},#{sqsl}<if test="shsl!=null">,#{shsl}</if>,#{saveTime})
+		
+	</insert>
+	
+	<insert id="saveBhHotel" parameterType="map">
+		insert into BH_HOTEL (ID,DJBH,SQRQ,SAVE_TIME,JDBH,SUB_COSTCENTER,COSTCENTER_SUB_USER,MBID,COSTCENTER_SUB_TIME,JDID,JD_SUB_USER,JD_SUB_USER_ID,IS_CUSTOMER,SUB_STATE) 
+		values(#{id},#{djbh},#{sqrq},#{saveTime},#{jdmc},#{subCostCenter},#{subUser},#{mbId},#{costSubTime},#{jdId},#{jdSubUser},#{jdSubUserId},#{isCustomer},#{jdSubState})
+	</insert>
+	
+	<update id="updateJdbhByDjbhAndWlbm" parameterType="map" >
+		update BH_HOTEL_LIST set sqsl=#{sqsl} <if test="shsl!=null">,shsl=#{shsl}</if>where djbh=#{djbh} and wlbm=#{wlbm} and SAVE_TIME=#{saveTime}
+	</update>
+	
+	
+	
+	<update id="updateSqslAndShslByDjbh" parameterType="map" >
+		update BH_HOTEL_LIST set sqsl=#{sqsl} <if test="shsl!=null">,shsl=#{shsl}</if>where djbh=#{djbh}
+	</update>
+	
+	
+	<update id="updateJdbhSubStateByDjbhAndWlbm" parameterType="map" >
+		update BH_HOTEL set sub_state='1' where jdId=#{jdId}  and MBID=#{mbId} and wlbm=#{wlbm} and sqrq=#{day}
+	</update>
+	
+	<update id="updateJdbhSubStateByTableId" parameterType="map" >
+		update BH_HOTEL set sub_state=#{subState} where id in 
+		<foreach collection="id" index="index" item="id" open="(" separator="," close=")">  
+            #{id}  
+        </foreach>
+	</update>
+	
+	<update id="updateJdbhSubStateByJdIdAndMbIdAndDay" parameterType="map">
+		update BH_HOTEL set sub_state=#{subState} where sqrq=#{day} 
+		<if test="mbId!=null">
+			and MBID in
+		<foreach collection="mbIds" index="index" item="mbIds" open="(" separator="," close=")">  
+            #{mbIds}  
+        </foreach>
+		</if>
+		
+		<if test="jdIds!=null">
+			<foreach collection="jdIds" index="index" item="jdIds" open="(" separator="," close=")">  
+	            and jdId in #{jdIds}  
+	        </foreach>
+		</if>
+		    and SUB_STATE=#{oldSubState}
+	</update>
+	
+	<select id="selectCentersByCostCenterId" parameterType="map" resultType="lanhai.entity.BhCostCenter">
+		select subOrg.fID as id,subOrg.FDISPLAYNAME_L2 as centerName from t_org_costcenter subOrg
+		inner join t_org_costcenter porg
+		ON subOrg.flongnumber like porg.flongnumber || '!%'
+		where porg.fid = #{costCenterId}
+		<!-- <foreach collection="costCenterIds" index="index" item="costCenterIds" open="(" separator="," close=")">  
+            #{costCenterIds}  
+        </foreach> -->
+	</select>
+	
+	
+	<!-- 获取今天报过货的档口ID -->
+	<!-- <select id="selectCostCenterIdsBhedToday" parameterType="map"  resultType="lanhai.entity.BhCostCenter">
+		select bl.sub_costcenter_id as id,toc.FNAME_L2 as centerName
+		from BH_LIST bl
+		left join T_ORG_COSTCENTER toc on toc.fid=bl.sub_costcenter_id
+		where sub_state in('1','3') and sqrq=#{today} and bl.ORG_ID=#{jdId}
+		group by bl.sub_costcenter_id,toc.FNAME_L2
+	</select> -->
+	
+	<!-- 获取今天报过货的档口ID  2018-12-28日更改为获取该酒店（库存组织）下的所有状态为提交的档口ID-->
+	<select id="selectCostCenterIdsBhedToday" parameterType="map"  resultType="lanhai.entity.BhCostCenter">
+		select bl.sub_costcenter_id as id,toc.FNAME_L2 as centerName
+		from BH_LIST bl
+		left join T_ORG_COSTCENTER toc on toc.fid=bl.sub_costcenter_id
+		where sub_state in('1') and bl.ORG_ID=#{jdId}
+		group by bl.sub_costcenter_id,toc.FNAME_L2
+	</select>
+	
+	
+	
+	
+	<select id="selectIdsByJdAndMbAndDayAndWl" parameterType="map" resultType="java.lang.String">
+		select a.id from 
+		(select id from bh_hotel where jdId=#{jdId} and sqrq=#{day} and mbid=#{mbId} and sub_State=#{oldSubState}) a
+		
+		inner join (select id from bh_hotel_list where wlbm=#{wlbm}) b
+		on a.id=b.id
+	</select>
+	
+	<update id="updateDkBhSubState" parameterType="map">
+		update bh_list set SUB_STATE=#{state} where djbh=#{djbh}
+	</update>
+	
+	
+	<select id="selectJtHaveByJdIdAndMbAndDay" parameterType="map" resultType="java.lang.String">
+		select id from BH_JT_RESULT where JDID=#{jdId} and MBID=#{mbId} and SQRQ=#{day} and sub_state=#{subState}
+	</select>
+	
+	
+	<select id="selectJtWlCountByJdIdAndMbIdAndDay"  parameterType="map"  resultType="lanhai.entity.Jdhz">
+		select id,sqsl,shsl from BH_JT_RESULT_ENTRY where parentId=#{id} and wlbm=#{wlbm}
+	</select>
+	
+	
+	<select id="selectControlCompanysByUsername" parameterType="map" resultType="lanhai.entity.Company">
+		select tpo.forgid as id,tob.fname_l2 as companyName,tob.fnumber as companyNumber
+		from t_pm_orgrange tpo 
+		left join t_pm_user tpu on tpu.fid=tpo.fuserid
+		left join t_org_baseunit tob on tob.fid=tpo.forgid
+		where tpu.fname_l2=#{userName} and tpo.ftype='10'
+		
+	</select>
+	
+	
+	<select id="selectJdBhSubStateNot1" parameterType="map" resultType="java.lang.Integer">
+		 select count(*) from BH_HOTEL where jdid=#{jdId} and sub_state &lt;&gt; #{subState} and sqrq=#{day}
+	</select>
+	
+	<select id="selectJtSubStateNot0" parameterType="map" resultType="java.lang.Integer">
+		 select count(*) from BH_JT_RESULT where jdid=#{jdId} and sub_state &lt;&gt; #{jtSubState} and sqrq=#{day} and CREATORUSERID=#{subUserId}
+	</select>
+	
+	<select id="selectIdByJdAndDay" parameterType="map" resultType="java.lang.String">
+		select id from BH_HOTEL where jdid=#{jdId} and sub_state=#{subState} and sqrq=#{day}
+	</select>
+	
+	
+	
+	<select id="selectBhedMbsByJdId" parameterType="map" resultType="lanhai.entity.Mblx">
+		select bh.mbid as id,ccl.fnumber as mbmc from BH_HOTEL bh
+		 left join CT_CUS_LHBHTEMPLATE ccl on ccl.fid=bh.mbid
+		 where jdid=#{jdId} and sqrq=#{sqrq} and sub_state=#{subState}
+		 group by bh.mbid,ccl.fnumber
+	</select>
+	
+	
+	<select id="selectTableHeadIdsByJdAndUserAndDay" parameterType="map" resultType="java.lang.String">
+		select id from BH_JT_RESULT where JDID=#{jdId} and sqrq=#{day} and sub_State=#{jtSubState}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

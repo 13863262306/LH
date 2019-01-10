@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="lanhai.dao.JiTuanDao">
+	
+	<!-- left join T_IM_Inventory inv on inv.FMaterialID=tbml.fid and inv.FStorageOrgUnitID=ccle.CFFAHUOORGID and FWarehouseID='yDAAAAPccaa76fiu' -->
+	<select id="selectJiTuanhzList" parameterType="map" resultType="lanhai.entity.Jdhz">
+	
+	select bl.jdId,
+			bl.JD_NAME as subCostCenter,
+			  bl.MBID as mbId,
+			  bwl.wlbm as wlbm,
+			  tbml.fid as wlId,
+		      tbml.fname_l2 as wlmc,
+		      tbml.FModel as wlgg,
+		      TBM.fname_l2 as jldw,
+		      bl.sqrq as sqrq,
+		      max(BL.CREATETIME) as costCenterSubTime,
+		      sum(bwl.shsl) as sqsl,
+		      sum(bwl.cgsl) as cgsl,
+		      sum(bwl.ckfhsl) as ckfhsl,
+		      sum(bwl.fbsl) as fbsl,
+		      sum(epr.YIELD) as zcsl,
+		      
+		      max(BWL.ID) as tableEntryId,
+		      max(bl.ID) as tableHeadId,
+		      bl.sub_state as subState,
+		      ccle.CFFAHUOORGID as fhzz,
+		      ccle.CFSENDSTOCKID as ckzz,
+		      ccle.CFCAIGOUORGID as cgzz,
+		      ccle.CFISZICAI as isZiCai,
+		      bl.IS_CUSTOMER as isCustomer
+		      from BH_JT_RESULT bl
+		      right join BH_JT_RESULT_ENTRY BWL on bwl.parentId=bl.id 
+		      left join ECOLOGICAL_PARK_PRODUCE epr on epr.WL_ID=bwl.wlbm and epr.SUB_DAY=#{selectDay}
+		      left join T_BD_Material tbml on tbml.fnumber=bwl.wlbm
+		 		left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 		left join CT_CUS_LHBHTEMPLATE ccle on ccle.fid=bl.mbid
+		 		
+		where  bl.SUB_STATE in <foreach collection="states" index="index" item="states" open="(" separator="," close=")">  
+            						#{states}  
+        						</foreach>
+		
+		<if test="onlyByState==null">
+			and bl.sqrq=#{selectDay}
+		</if>
+		
+		<if test="jdId!=null">
+			and BL.jdId in 
+			<foreach collection="jdId" index="index" item="jdId" open="(" separator="," close=")">  
+            	#{jdId}  
+        	</foreach>
+		</if>
+		<if test="controlMbIds!=null">
+			and BL.mbId in 
+			<foreach collection="controlMbIds" index="index" item="controlMbIds" open="(" separator="," close=")">  
+            	#{controlMbIds}  
+        	</foreach>
+		</if>
+		group by BL.JDID,bl.JD_NAME,bl.MBID,ccle.CFSENDSTOCKID,ccle.CFISZICAI,ccle.CFFAHUOORGID,bl.sqrq,bwl.wlbm,tbml.fid,tbml.fname_l2,tbml.FModel,TBM.fname_l2,bl.sub_state,ccle.CFCAIGOUORGID,bl.IS_CUSTOMER
+		order by BL.JDID,bl.sub_state desc,bwl.wlbm
+	
+	
+	<!-- select BL.JDBH as subCostCenter,
+			  bl.MBID as mbId,
+			  bwl.wlbm as wlbm,
+		      tbml.fname_l2 as wlmc,
+		      tbml.FModel as wlgg,
+		      TBM.fname_l2 as jldw,
+		      bl.sqrq as sqrq,
+		      max(BL.COSTCENTER_SUB_TIME) as costCenterSubTime,
+		      SUM(bwl.shsl) as sqsl,
+		      max(epr.YIELD) as zcsl,
+		      max(inv.FBaseQty) as kcsl,
+		      bl.jdId,
+		      ccle.CFFAHUOORGID as fhzz,
+		      ccle.CFCAIGOUORGID as cgzz,
+		      bl.IS_CUSTOMER as isCustomer
+		      from BH_HOTEL_LIST BWL
+		      left join BH_HOTEL BL on bwl.ID=bl.ID and bwl.djbh=bl.djbh and  bwl.SAVE_TIME=bl.SAVE_TIME
+		      left join ECOLOGICAL_PARK_PRODUCE epr on epr.WL_ID=bwl.wlbm and epr.SUB_DAY=#{selectDay}
+		      left join T_BD_Material tbml on tbml.fnumber=bwl.wlbm
+		 		left join t_bd_measureunit TBM on tbml.FBASEUNIT=tbm.fid
+		 		left join CT_CUS_LHBHTEMPLATE ccle on ccle.fid=bl.mbid
+		 		left join T_IM_Inventory inv on inv.FMaterialID=tbml.fid and inv.FStorageOrgUnitID=ccle.CFFAHUOORGID
+		where  bl.SUB_STATE in('1','3') and bl.sqrq=#{selectDay}
+		<if test="jdId!=null">
+			and BL.jdId in 
+			<foreach collection="jdId" index="index" item="jdId" open="(" separator="," close=")">  
+            #{jdId}  
+        </foreach>
+		</if>
+		group by BL.JDBH,bl.MBID,ccle.CFFAHUOORGID,bl.sqrq,bwl.wlbm,tbml.fname_l2,tbml.FModel,TBM.fname_l2,bl.jdId,ccle.CFCAIGOUORGID,bl.JD_SUB_USER,bl.IS_CUSTOMER
+		order by BL.JDBH -->
+	
+	
+	
+	
+	
+	
+	
+	<!-- select BL.sub_CostCenter as subCostCenter,
+			  bl.MBID as mbId,
+			  tbml.fnumber as wlbm,
+		      wl.CFWLNAME as wlmc,
+		      tbml.FModel as wlgg,
+		      TBM.fname_l2 as jldw,
+		      bl.sqrq as sqrq,
+		      max(BL.COSTCENTER_SUB_TIME) as costCenterSubTime,
+		      SUM(bwl.sqsl) as sqsl,
+		      SUM(bwl.shsl) as shsl,
+		      BL.COSTCENTER_SUB_USER as costCenterSubUser,
+		      epr.YIELD as zcsl
+		      from BH_HOTEL_LIST BWL
+		      left join BH_HOTEL BL on bwl.ID=bl.ID and bwl.djbh=bl.djbh and  bwl.SAVE_TIME=bl.SAVE_TIME
+		      left join CT_CUS_LHBHTEMPLATEENTRY WL on wl.CFWLID=bwl.wlbm
+		      left join t_bd_measureunit TBM on wl.CFWLUNITEID=tbm.fid
+		      left join ECOLOGICAL_PARK_PRODUCE epr on epr.WL_ID=bwl.wlbm and epr.SUB_DAY=#{selectDay}
+		      left join T_BD_Material tbml on tbml.fid=wl.cfwlid
+		where  bl.SUB_STATE='1' and bl.sqrq=#{selectDay}
+		group by BL.sub_CostCenter,bl.MBID,BL.COSTCENTER_SUB_USER,bl.sqrq,tbml.fnumber,wl.CFWLNAME,tbml.FModel,TBM.fname_l2,epr.YIELD
+		order by BL.sub_CostCenter -->
+	</select>
+	
+	<select id="selectBhedJdIds"  parameterType="map" resultType="lanhai.entity.Company">
+		select distinct(bh.jdId) as id,bh.jdbh as companyName
+		from bh_hotel bh 
+		where sqrq=#{day} and sub_state in ('1','3') 
+		
+		<if test="mbIds!=null">
+		and bh.mbId in
+		<foreach collection="mbIds" index="index" item="mbIds" open="(" separator="," close=")">  
+            	#{mbIds}  
+        </foreach>
+		
+		</if>
+		
+	</select>
+	
+	<select id="selectKcsl" parameterType="map" resultType="java.lang.Integer">
+		select sum(FBaseQty) from T_IM_Inventory where FMaterialID=#{wlId} 
+		<if test="kczz!=null">and FStorageOrgUnitID=#{kczz}</if> 
+		<if test="ckzz!=null">and FWarehouseID=#{ckzz}</if>
+	</select>
+	
+	<select id="All" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select bwl.wlbm as wlbm,
+		      wl.wlmc as wlmc,
+		      wl.wlgg as wlgg,
+		      bl.sqrq as sqrq,
+		      wl.wljl as jldw,bwl.SAVE_TIME as saveTime,
+		      sum(bwl.sqsl) as sqsl,sum(bwl.shsl) as shsl
+		      from BH_HOTEL_LIST BWL,BH_HOTEL BL,wl_list WL
+		where bwl.djbh=bl.djbh and bwl.SAVE_TIME=bl.SAVE_TIME
+		<if test="selectDay!=null">and bl.sqrq=#{selectDay}</if>
+		and wl.wlbm=bwl.wlbm 
+		group by bwl.wlbm,wl.wlmc,wl.wlgg,bl.sqrq,wl.wljl,bwl.SAVE_TIME
+		order by bwl.wlbm
+	</select>
+	
+	
+	<insert id="saveJtHz" parameterType="lanhai.entity.Jdhz" useGeneratedKeys="true">
+		<selectKey keyProperty="id" order="BEFORE" resultType="java.lang.String" >
+            select newbosId('73CA62AD') as id from DUAL
+        </selectKey>
+	    insert into CT_CUS_LHBHJTFB(FID,
+	    <if test="cgzz!=null">CFCAIGOUORGID,</if>
+	    <if test="fhzz!=null">CFFAHUOORGID,</if>
+	    <if test="ckzz!=null">CFCANGKU,</if>
+	    <if test="cwzz!=null">CFCAIWUZHUZHIID,</if>
+	    <if test="customerId!=null">CFBHCUSTID,</if>
+	    <if test="paperType!=null">PAPER_TYPE,</if>
+	    								CFISSHUCHUDIAN,
+										FCREATETIME,
+										FBIZDATE,
+										FCONTROLUNITID,
+										FCREATORID,
+										FLASTUPDATEUSERID,
+										FLASTUPDATETIME,
+										FNUMBER,
+										CFORGID,
+										CFBHTEMPLATEID
+										)
+	
+		values(#{id},
+		<if test="cgzz!=null">#{cgzz},</if>
+		<if test="fhzz!=null">#{fhzz},</if>
+		<if test="ckzz!=null">#{ckzz},</if>
+		<if test="cwzz!=null">#{cwzz},</if>
+		<if test="customerId!=null">#{customerId},</if>
+		<if test="paperType!=null">#{paperType},</if>
+				#{isCustomer},
+				SYSTIMESTAMP,
+				to_timestamp(#{subTime},'yyyy-mm-dd hh24:mi:ss'),
+				'00000000-0000-0000-0000-000000000000CCE7AED4',
+				#{jtSubUserId},
+				'256c221a-0106-1000-e000-10d7c0a813f413B7DE7F',
+				SYSTIMESTAMP,
+				#{tableHeadId},
+				#{subCostCenter},
+				#{mbId}
+			                       )
+	</insert>
+	
+	<insert id="saveJtHzEntry" parameterType="lanhai.entity.Jdhz">
+		
+		insert into CT_CUS_LHBHJTFBENTRY(FID,FPARENTID,FSEQ,
+				CFREQQTY,
+				<if test="ckfhsl!=null">CFSENDQTY,</if>
+				<if test="kcsl!=null">CFKCQTY,</if>
+				<if test="zcsl!=null">CFZCQTY,</if>
+				<if test="fbsl!=null">CFFBQTY,</if>
+				<if test="cgsl!=null">CFCGQTY,</if>
+				<if test="jldw!=null">CFWLUNITID,</if>
+				CFWLID)
+		values(newbosid('C09959C5'),#{id},2,
+				#{sqsl},
+				<if test="ckfhsl!=null">#{ckfhsl},</if>
+				<if test="kcsl!=null">#{kcsl},</if>
+				<if test="zcsl!=null">#{zcsl},</if>
+				<if test="fbsl!=null">#{fbsl},</if>
+				<if test="cgsl!=null">#{cgsl},</if>
+				<if test="jldw!=null">#{jldw},</if>
+				#{wlbm})
+	</insert>
+	
+	
+	<insert id="saveJtResultNotNull"  parameterType="lanhai.entity.Jdhz">
+		
+        insert into BH_JT_RESULT(ID
+        						<if test="jdId!=null">,JDID</if>
+        						<if test="subCostCenter!=null">,JD_NAME</if>
+        						<if test="mbId!=null">,MBID</if>
+        						<if test="jtResultType!=null">,RESULT_TYPE</if>
+        						<if test="jtSubUserId!=null">,CREATORUSERID</if>
+        						<if test="saveTime!=null">,SQRQ</if>
+        						<if test="subTime!=null">,CREATETIME</if>
+        						<if test="subState!=null">,SUB_STATE</if>
+        						<if test="isCustomer!=null">,IS_CUSTOMER</if>
+        						<if test="subUserId!=null">,CREATORUSERID</if>
+        						)
+	
+		values(#{id}
+				<if test="jdId!=null">,#{jdId}</if>
+				<if test="subCostCenter!=null">,#{subCostCenter}</if>
+				<if test="mbId!=null">,#{mbId}</if>
+				<if test="jtResultType!=null">,#{jtResultType}</if>
+				<if test="jtSubUserId!=null">,#{jtSubUserId}</if>
+				<if test="saveTime!=null">,#{saveTime}</if>
+				<if test="subTime!=null">,#{subTime}</if>
+				<if test="subState!=null">,#{subState}</if>
+				<if test="isCustomer!=null">,#{isCustomer}</if>
+				<if test="subUserId!=null">,#{subUserId}</if>)
+	</insert>
+	
+	
+	<select id="selectFbPaperById" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select JDID, 
+				MBID,
+				CREATORUSERID as jtSubUserId,
+				SQRQ as saveTime,
+				IS_CUSTOMER as isCustomer,
+				JD_NAME as subCostCenter
+		from BH_JT_RESULT 
+		where id=#{id}
+	</select>
+	
+	
+	
+	
+	
+	<insert id="saveJtResultEntryNotNull"  parameterType="lanhai.entity.Jdhz">
+		insert into BH_JT_RESULT_ENTRY(
+		ID,PARENTID
+		<if test="wlbm!=null">,WLBM</if>
+		<if test="sqsl!=null">,SQSL</if>
+		<if test="shsl!=null">,SHSL</if>
+		<if test="kcsl!=null">,KCSL</if>
+		<if test="cgsl!=null">,CGSL</if>
+		<if test="fbsl!=null">,FBSL</if>
+		<if test="zcsl!=null">,ZCSL</if>
+		<if test="ckfhsl!=null">,CKFHSL</if>
+		)values(
+			#{tableEntryId},#{id}
+		<if test="wlbm!=null">,#{wlbm}</if>
+		<if test="sqsl!=null">,#{sqsl}</if>
+		<if test="shsl!=null">,#{shsl}</if>
+		<if test="kcsl!=null">,#{kcsl}</if>
+		<if test="cgsl!=null">,#{cgsl}</if>
+		<if test="fbsl!=null">,#{fbsl}</if>
+		<if test="zcsl!=null">,#{zcsl}</if>
+		<if test="ckfhsl!=null">,#{ckfhsl}</if>
+		)
+		
+	</insert>
+	
+	
+	<update id="updateJtResultEntryNotNullById"  parameterType="lanhai.entity.Jdhz">
+		update BH_JT_RESULT_ENTRY set column1='1'
+		<if test="sqsl!=null">,sqsl=#{sqsl}</if>
+		<if test="shsl!=null">,shsl=#{shsl}</if>
+		<if test="kcsl!=null">,kcsl=#{kcsl}</if>
+		<if test="cgsl!=null">,cgsl=#{cgsl}</if>
+		<if test="fbsl!=null">,fbsl=#{fbsl}</if>
+		<if test="zcsl!=null">,zcsl=#{zcsl}</if>
+		<if test="ckfhsl!=null">,ckfhsl=#{ckfhsl}</if>
+		where id=#{id}
+		
+	</update>
+	
+	
+	<update id="updateJtResultNotNullById">
+		update BH_JT_RESULT set LAST_UPDATE_TIME=#{subTime}
+		<if test="jdId!=null">,JDID=#{jdId}</if>
+		<if test="mbId!=null">,MBID=#{mbId}</if>
+		<if test="resultType=null">,RESULT_TYPE=#{resultType}</if>
+		<if test="subUserId!=null">,CREATORUSERID=#{subUserId}</if>
+		<if test="subState!=null">,SUB_STATE=#{subState}</if>
+		where id=#{id}
+	</update>
+	
+	
+	<select id="selectYieldByWlIdAndDay"  parameterType="map" resultType="java.lang.String">
+		select yield from ECOLOGICAL_PARK_PRODUCE where WL_ID=#{wlbm} and SUB_DAY=#{subDay} and sub_state='1'
+	</select>
+	
+	<select id="selectMbIdByUser" parameterType="map" resultType="java.lang.String">
+	
+		<!-- select ccle.fid from CT_CUS_LHBHTEMPLATE ccle
+		left join t_pm_user tpu on tpu.fid=ccle.CFCKUSERID
+		where tpu.fname_l2=#{name} -->
+	
+	
+	<!-- String str2="/*dialect*/色lect CT_BD_Mbyckrydyb.CFBhTemplateID from CT_BD_MbyckrydybEemp " +
+    				"inner join CT_BD_Mbyckrydyb on CT_BD_Mbyckrydyb.fid=CT_BD_MbyckrydybEemp.fparentid " +
+    				"inner join t_pm_user on t_pm_user.fid=CT_BD_MbyckrydybEemp.CFCgEmpID " +
+    				"where t_pm_user.fid='" + user.getId().toString() + "'" ; -->
+	
+		select cbmb.CFBHTEMPLATEID from CT_BD_MBYCKRYDYB cbmb
+		left join CT_BD_MBYCKRYDYBEEMP cbmp on cbmp.fparentid=cbmb.fid
+		left join t_pm_user tpu on tpu.Fid=cbmp.CFCGEMPID
+		WHERE TPU.fnumber=#{name}
+		
+		
+		
+	</select>
+	
+	<select id="selectMbInfosByMbIds" parameterType="map"  resultType="lanhai.entity.Mblx">
+		select fid as id,fnumber as mbmc from CT_CUS_LHBHTEMPLATE where fid =#{ambId}
+	</select>
+	
+	<select id="selectMbTypeByMbId" parameterType="map" resultType="lanhai.entity.Mblx">
+		select cbbx.FNUMBER as mbNumber,cbbx.fid as id,cbbx.fname_l2 as mbmc
+		from CT_BD_Bhmblx cbbx
+		left join  CT_CUS_LHBHTemplate ccle on ccle.CFBHMBLXID=cbbx.fid
+		where ccle.fid=#{mbId}
+	</select>
+	
+	
+	<update id="setMbSubKeyByMb" parameterType="map">
+		update CT_CUS_LHBHTEMPLATE set BAOHUOINPUTKEY=#{inputKey} where fid in
+		<foreach collection="mbIds" index="index" item="mbIds" open="(" separator="," close=")">  
+            	#{mbIds}  
+        </foreach>
+		
+		
+	</update>
+	
+	<select id="selectJlIdByWlId" parameterType="map" resultType="java.lang.String">
+		select fid from T_BD_MeasureUnit where fid=(select FBaseUnit from T_BD_Material where fid=#{wlbm})
+	</select>
+	
+	<delete id="deleteJtTableHeadById" parameterType="map">
+		delete from BH_JT_RESULT where id in 
+		<foreach collection="ids" index="index" item="ids" open="(" separator="," close=")">  
+            	#{ids}  
+        </foreach>
+	</delete>
+	
+	<delete id="deleteJtTableEntryByParentId" parameterType="map">
+		delete from BH_JT_RESULT_ENTRY where parentid in 
+		<foreach collection="ids" index="index" item="ids" open="(" separator="," close=")">  
+            	#{ids}  
+        </foreach>
+	</delete>
+	
+	<select id="selectSerialNumberByPaperAndDay"  parameterType="map" resultType="java.lang.Integer">
+		select serial_number from BH_JT_PAGE_SERIAL_NUMBER where paper_type=#{paperType} and day=#{day} and org_id=#{orgId}
+	</select>
+	
+	<insert id="saveSerialNumber" parameterType="map">
+		insert into BH_JT_PAGE_SERIAL_NUMBER values(#{beginNumber},#{paperType},#{day},#{orgId})
+	</insert>
+	
+	<update id="updateSerialNumber" parameterType="map">
+		update BH_JT_PAGE_SERIAL_NUMBER set SERIAL_NUMBER = SERIAL_NUMBER+1 where paper_type=#{paperType} and day=#{day}
+	</update>
+	
+	
+	<select id="selectTableHeadInfo" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select fid as id,fnumber as tableHeadId from CT_CUS_LHBHJTFB where to_char(fbizdate,'yyyy-MM-dd') = #{day}
+		<if test="jdId!=null">and cforgid=#{jdId}</if>
+		<if test="mbId!=null">and CFBHTEMPLATEID=#{mbId}</if>
+		<if test="cgzz!=null">and CFCAIGOUORGID=#{cgzz}</if>
+		<if test="paperType!=null">and PAPER_TYPE=#{paperType}</if>
+		<if test="fhzz!=null">and CFFAHUOORGID=#{fhzz}</if>
+		  <if test="subTime!=null">and to_char(FCREATETIME,'yyyy-MM-dd HH:mm:ss') = #{subTime}</if>
+	</select>
+	
+	
+	<!-- 内部组织查询酒店所在区域 -->
+	<select id="selectAreaByJdId" parameterType="map" resultType="java.lang.String">
+		select fname_l2 from T_BD_Area where fid=(
+		select FAreaID from T_ORG_OUPartAdmin where fid=(
+		select FPartAdminID from T_ORG_BaseUnit where fid=#{jdId}))
+	</select>
+	
+	<!-- 输出管理店查询酒店所在区域 -->
+	<select id="selectCityByJdId" parameterType="map" resultType="java.lang.String">
+		select fname_l2 from T_BD_City where fid=(
+		select FCityID from T_BD_Customer where fid=#{jdId})
+	</select>
+	
+	<!-- <select id="selectJdhzList" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select bwl.wlbh as wlbm,
+		      wl.wlmc as wlmc,
+		      wl.wlgg as wlgg,
+		      bl.sqrq as sqrq,
+		      wl.wljl as jldw,
+		      sum(bwl.wlsq) as sqsl,sum(bwl.shsl) as shsl
+		      from bh_wl_list BWL,bh_list BL,wl_list WL
+		where bwl.djbh=bl.djbh 
+		<if test="selectDay!=null">and bl.sqrq=#{selectDay}</if>
+		and wl.wlbm=bwl.wlbh 
+		<if test="wlbm!=null">and wl.wlbm=#{wlbm}</if>
+		group by bwl.wlbh,wl.wlmc,wl.wlgg,bl.sqrq,wl.wljl
+		order by bwl.wlbh
+	</select>
+	
+	<select id="selectJdbhList" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select bwl.wlbm as wlbm,
+		      wl.wlmc as wlmc,
+		      wl.wlgg as wlgg,
+		      bl.sqrq as sqrq,
+		      wl.wljl as jldw,
+		      BWL.sqsl as sqsl,BWL.shsl as shsl,BWL.djbh as djbh,BWL.SAVE_TIME as saveTime
+		      from BH_HOTEL_LIST BWL,BH_HOTEL BL,wl_list WL
+		where bwl.djbh=bl.djbh and BWL.SAVE_TIME=BL.SAVE_TIME
+		<if test="selectDay!=null">and bl.sqrq=#{selectDay}</if>
+		and wl.wlbm=bwl.wlbm 
+		<if test="jdId!=null">and BL.jdbh=#{jdId}</if>
+		group by bwl.wlbm,wl.wlmc,wl.wlgg,bl.sqrq,wl.wljl,bwl.sqsl,bwl.shsl,BWL.djbh,BWL.SAVE_TIME
+		order by bwl.wlbm
+	</select>
+	
+	根据物料ID和日期查询某物料的suoyoudanjuxinxi
+	<select id="selectDjByWlidAndDay" parameterType="map" resultType="lanhai.entity.Jdhz">
+		select bwl.wlbh as wlbm,
+			bwl.id as bwlId,
+	        wl.wlmc as wlmc, 
+	        bl.djbh as djbh,
+	        wl.wlgg as wlgg, 
+	        bl.sqrq as sqrq, 
+	        wl.wljl as jldw, 
+	        bwl.wlsq as sqsl,
+	        bwl.shsl as shsl,
+	  from bh_wl_list BWL,bh_list BL,wl_list WL 
+	  where bwl.djbh=bl.djbh and wl.wlbm=bwl.wlbh and bwl.wlbh=#{wlbm} and bl.sqrq=#{day}
+	</select>
+	
+	<delete id="deleteBhListByDjbh" parameterType="java.lang.String">
+		delete from BH_LIST where DJBH=#{djbh} 
+	</delete>
+	<delete id="deleteBhWlListByDjbh" parameterType="java.lang.String">
+		delete from BH_WL_LIST where DJBH=#{djbh} 
+	</delete>
+	
+	<delete id="deleteJdBhListByDjbh">
+		delete from BH_HOTEL where DJBH=#{djbh} and SAVE_TIME=#{saveTime}
+	</delete>
+	<delete id="deleteJdBhWlListByDjbh">
+		delete from BH_HOTEL_LIST where DJBH=#{djbh} and SAVE_TIME=#{saveTime}
+	</delete>
+	
+	<insert id="saveBhHotelList" parameterType="map">
+		insert into  BH_HOTEL_LIST (DJBH,WLBM,SQSL,SHSL,SAVE_TIME) values(#{djbh},#{wlbm},#{sqsl},#{shsl},#{saveTime})
+	</insert>
+	
+	<insert id="saveBhHotel" parameterType="map">
+		insert into BH_HOTEL (DJBH,SQRQ,SAVE_TIME) values(#{djbh},#{sqrq},#{saveTime})
+	</insert>
+	
+	<update id="updateJdbhByDjbhAndWlbm" parameterType="map" >
+		update BH_HOTEL_LIST set sqsl=#{sqsl} <if test="shsl!=null">,shsl=#{shsl}</if>where djbh=#{djbh} and wlbm=#{wlbm} and SAVE_TIME=#{saveTime}
+	</update> -->
+	
+</mapper>

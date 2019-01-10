@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<div th:include="header::headLink"></div>
+    <title th:text="${wlmc+''+'报货详情'}"></title>
+	</head>
+<body style="background-color:#eee">
+            <div class="row wrapper border-bottom white-bg page-heading" style="padding-top: 15px">
+                <div class="col-lg-12">
+                    <span style="font-size: 22px; margin-top: 10px; margin-left: 10px"><strong th:text="${day+' '+'  '+wlmc+' '+'报货详情'}">报货系统</strong></span>
+					<span style="position: absolute; right: 230px; top: 20px; font-size: 16px"th:text="${user.costCenterName}"></span> 
+					<span style="position: absolute; right: 150px; top: 20px; font-size: 16px" th:text="${user.name}"></span> 
+					<a style="position: absolute; right: 70px; top: 20px; font-size: 16px" th:text="消息"></a>
+                </div>  </div>
+              <div class="animated" style="height:100%;background-color:#eee">
+            <div class="row">
+                <div class="col-lg-12">                   
+                    <div class="ibox ">                             
+                        <div class="ibox-content">
+                               <div class="col-sm-12"> 
+                        <div class="input-group">
+                        <div><span id="theDay" th:attr="day=${day}"style="font-size:20px" th:text="${'申请日期：'+day}">申请日期：</span></div>
+                                   
+                            </div>
+                            <div style="font-size:20px"><span>物料编码：</span><span th:text="${wlbm}"></span></div>
+                                   
+                                   <div style="font-size:20px"><span>物料名称：</span><span th:text="${wlmc}"></span></div>
+                                   
+                                   <div style="font-size:20px"><span>物料规格：</span><span th:text="${wlgg}"></span></div>
+                                   
+                                   <div style="font-size:20px"><span>计量单位：</span><span th:text="${jldw}"></span></div>
+                            <table class="footable table table-stripped " data-limit-navigation="5" data-page-size="10" data-filter=#filter >
+                                <thead>
+                                	<th width="25%" style="text-align:center">报货档口</th>
+                                    <th  width="25%" style="text-align:center">申请数量</th>
+                                    <th  width="25%" style="text-align:center">审核数量</th>
+                                    <th width="25%" style="text-align:center">操作</th>
+                                </thead>
+                                <tbody id="eatter">
+                                 
+                                <tr class="gradeX" th:if="${jdhzListSize eq 0}">
+                                   <td colspan="12">暂无数据</td>
+                                </tr>
+                           <!--      <tr class="gradeX" th:each="plantypeList : ${plantypeList}"> -->
+                                 <tr  class="gradeX tabletrVal" th:each="wlList: ${jdhzList}" >
+                                 	<td style="text-align:center" th:text="${wlList.subCostCenter==null?'':wlList.subCostCenter}"></td>
+                                    <td style="text-align:center">
+							 			<input  class="sqslInput" th:value="${wlList.sqsl==null?'':wlList.sqsl}" type="text"style="text-align:center">
+							 		</td>
+                                    <td style="text-align:center">
+                                    	<input class="shslInput" th:value="${wlList.shsl==null?'':wlList.shsl}" type="text" style="text-align:center">
+                                    </td>
+                                    <td  style="text-align:center">
+                                    	
+                                    	<button type="button" th:attr="djbh=${wlList.djbh}" class="btn btn-w-m btn-info" onclick="toSaveBhOfDetail(this)" style="text-align:center">保存</button>
+                                    	<button type="button" th:attr="djbh=${wlList.djbh}" class="btn btn-w-m btn-danger" onclick="toDelOne(this)" style="text-align:center">删除</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                	<td  colspan="10">
+                                        <button type="button" class="btn btn-primary float-right" onclick="gotoJdhz()" style="font-size:17px;">返回</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                	
+                                    <td  colspan="14">
+                                        <ul class="pagination float-right"></ul>
+                                    </td>
+                                </tr>
+                                
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>              
+<!--            <div id="eatter">
+           </div>  -->
+            
+        </body>
+    <div th:include="footerLinkJs::footLink"></div>
+    <script>
+            $(document).ready(function() {
+                $('.footable').footable();
+            	$('.chosen-select').chosen({width: "100%",
+                    disable_search: true});
+          		  /* $("#wlMbSelect").change(function(){
+          			window.location.href="/bh/showBh?mbId="+$("#wlMbSelect").children('option:selected').val();
+                    }); */
+          		var today = getBeforeDate(0);
+          		/* $('.timeInput').datetimepicker({
+          			 autoclose: true,
+          			 minView: "month", //选择日期后，不会再跳转去选择时分秒
+          			 language: 'zh-CN',
+          			 todayBtn: 1,
+          			 format: "yyyy-mm-dd",
+          			startDay:today,
+          			 forceParse: 0,
+          			 pickTime: false,
+          			 pickerPosition: "bottom-right",
+          			 //initialDate:now,
+          			 onSelect: function (dateText, inst) {
+          			           // 不做任何处理
+          			 }
+          		}); */
+          		
+          		/* $('.timeInput').val(today); */
+            })	
+            function getBeforeDate(n){//n为你要传入的参数，当前为0，前一天为-1，后一天为1
+                  var date = new Date() ;
+                  var year,month,day ;
+                  date.setDate(date.getDate()+n);
+                  year = date.getFullYear();
+                  month = date.getMonth()+1;
+                  day = date.getDate() ;
+                  s = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) ;
+                  return s ;
+                }
+            
+          /* function toChangeDay(){
+        	  var day = $('.timeInput').val();
+        	  if(isEmpty(day)){
+             	 toastr.error("申请时间不能为空");
+             	 return;
+              }
+        	  window.location.href="/jdhz/jdhzList?day="+day;
+          } */
+        //保存
+          function toSaveBhOfDetail(ele){
+        	  var djbh = $(ele).attr("djbh");
+        	  var sqsl = $(ele).parent().parent().find(".sqslInput").get(0).value;
+        	  var shsl = $(ele).parent().parent().find(".shslInput").get(0).value;
+        	  console.log("dajb:"+djbh+",sqsl:"+sqsl+",shsl:"+shsl);
+        	
+         	 $.ajax({
+                  type: 'post',
+                  url: "/jdhz/toSaveBhOfDetail",
+                  data: {djbh:djbh,sqsl:sqsl,shsl:shsl},
+                  success: function (data) {
+               	   if(data=="保存成功"){
+           			   toastr.success(data);
+           			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+           		   }else{
+           			   toastr.error(data);
+           		   }
+                  }
+              });
+          }
+          function toDelOne(ele){
+        	  var djbh = $(ele).attr("djbh");
+        	  $.ajax({
+                  type: 'post',
+                  url: "/jdhz/delOneRowOfDetail",
+                  data: {djbh:djbh},
+                  success: function (data) {
+               	   if(data=="删除成功"){
+               		$(ele).parent().parent().remove();
+           			   toastr.success(data);
+           			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+           		   }else{
+           			   toastr.error(data);
+           		   }
+                  }
+              });
+          }
+        	  
+          function gotoJdhz(){
+        	  var day= $("#theDay").attr("day");
+        	  window.location.href="/jdhz/jdhzList?day="+day;
+          }
+          
+         /*  function toDetail(ele){
+        	  var wlbm = $(ele).attr("title");
+        	  var day= $('.timeInput').val();
+        	  console.log("wlbm:"+wlbm+",day:"+day);
+        	  window.location.href="/jdhz/oneDetail?day="+day+"&wlbm="+wlbm;
+          } */
+            //保存
+     /* function toSaveBo(){
+         var day = $('.timeInput').val();
+         if(isEmpty(day)){
+        	 toastr.error("申请时间不能为空");
+        	 return;
+         }
+    	 var djbh = $(".djbhInput").get(0).value;
+    	 if(isEmpty(djbh)){
+    		 toastr.error("单据编号不能为空");
+    		 return;
+    	 }
+    	 var trList = $(".tabletrVal");
+    	 if(0 == trList.length){
+     		toastr.error("没有数据需要保存");
+     		return;
+     	 }
+    	 var value="[";
+    	 for (var i=0;i<trList.length;i++) {
+    		 var wlbm = trList.eq(i).find(".wlbmTd").text();
+    		 var sqsl = trList.eq(i).find(".sqslInput").get(0).value;
+    	 if(i==0){
+			   value+="{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }else{
+			   value+=",{\"wlbm\":\""+wlbm+"\",\"sqsl\":\""+sqsl+"\"}";
+		   }
+    	 }
+    	 value+="]";
+    	 //保存
+    	 $.ajax({
+             type: 'post',
+             url: "/bh/toSaveBh",
+             data: { val:value,djbh:djbh,day:day},
+             success: function (data) {
+          	   if(data=="保存成功"){
+      			   toastr.success(data);
+      			   //addTabs("/evaluation/overallList?departmentId="+depId+"&rankId="+rankId);
+      		   }else{
+      			   toastr.error(data);
+      		   }
+             }
+         });
+     } */
+            
+            
+   //判断是否为空
+     function isEmpty(obj){
+  	    if(typeof obj == "undefined" || obj == null || obj == ""){
+  	        return true;
+  	    }else{
+  	        return false;
+  	    }
+  	}
+   
+            </script>
+</html>
